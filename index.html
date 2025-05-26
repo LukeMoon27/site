@@ -129,6 +129,13 @@
     button.back:hover {
       background-color: #374151;
     }
+    button.delete {
+      background-color: var(--error-500);
+      margin-top: 0.5rem;
+    }
+    button.delete:hover {
+      background-color: #dc2626;
+    }
     .error {
       color: var(--error-500);
       text-align: center;
@@ -184,6 +191,16 @@
       font-size: 1rem;
       border-radius: 8px;
     }
+    .consulta-item {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-left: 3px solid var(--primary-500);
+    }
+    .status-select {
+      width: auto;
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
     @media (max-width: 640px) {
       .login-box, .panel {
         padding: 1.25rem;
@@ -206,6 +223,11 @@
       }
       .menu-grid {
         grid-template-columns: 1fr;
+      }
+      .status-select {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.5rem;
       }
     }
   </style>
@@ -265,6 +287,13 @@
       return `${dia}/${mes}/${ano}`;
     }
 
+    function isConsultaPassada(consulta) {
+      if (!consulta.data || !consulta.hora) return false;
+      const consultaDate = new Date(`${consulta.data}T${consulta.hora}`);
+      const now = new Date();
+      return consultaDate < now;
+    }
+
     function render() {
       const app = document.getElementById("app");
       if (!app) {
@@ -304,9 +333,10 @@
                     <button onclick="currentScreen='addUniversitario';render()">Cadastrar Universitário(a)</button>
                     <button onclick="currentScreen='editProfile';render()">Editar Perfil</button>
                     <button onclick="currentScreen='addConsulta';render()">Agendar Consulta</button>
+                    <button onclick="currentScreen='manageConsultas';render()">Gerenciar Consultas</button>
                     <button onclick="currentScreen='addSaude';render()">Adicionar Dados de Saúde</button>
                     <button onclick="currentScreen='viewCharts';render()">Visualizar Gráficos</button>
-                    <button onclick="currentScreen='generateReport';render()">Gerar Relatório por Matrícula</button>
+                    <button onclick="currentScreen='generateReport';render()">Gerar Relatório por Matrícula (Estudante)</button>
                   </div>
                 </div>
               </div>
@@ -448,6 +478,24 @@
               </div>
             </div>
           `;
+        } else if (currentScreen === "manageConsultas") {
+          app.innerHTML = `
+            <div class="panel">
+              <div class="panel-content">
+                <h1>Painel do Administrador</h1>
+                <div class="section">
+                  <h2>Gerenciar Consultas</h2>
+                  <input id="manage-matricula" type="text" placeholder="Matrícula do Estudante">
+                  <button onclick="loadConsultas()">Filtrar Consultas</button>
+                  <div id="consultas-list" style="margin-top: 1rem;"></div>
+                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
+                </div>
+              </div>
+              <div class="panel-footer">
+                <button class="logout" onclick="handleLogout()">Sair</button>
+              </div>
+            </div>
+          `;
         } else if (currentScreen === "addSaude") {
           app.innerHTML = `
             <div class="panel">
@@ -493,6 +541,12 @@
           `;
         }
       } else if (currentUser === "estudante") {
+        if (!currentProfile) {
+          console.error("currentProfile não está definido!");
+          currentUser = null;
+          render();
+          return;
+        }
         app.innerHTML = `
           <div class="panel">
             <div class="panel-content">
@@ -525,15 +579,33 @@
               </div>
               <div class="section">
                 <h2>Consultas Agendadas</h2>
-                ${currentProfile.consultas.length > 0 ? `
-                  <ul>${currentProfile.consultas.map(c => `<li>${formatarDataBrasileira(c.data)} ${c.hora} - ${c.tipo}: ${c.descricao}</li>`).join('')}</ul>
-                ` : `<p>Sem consultas agendadas</p>`}
+                ${Array.isArray(currentProfile.consultas) && currentProfile.consultas.length > 0 ? `
+                  <ul>
+                    ${currentProfile.consultas.map((c, index) => `
+                      <li class="consulta-item">
+                        ${formatarDataBrasileira(c.data)} ${c.hora} - ${c.tipo}: ${c.descricao}
+                        ${c.status ? `<br><strong>Status:</strong> ${c.status}` : ''}
+                        ${isConsultaPassada(c) ? `
+                          <br><button class="delete" onclick="deleteConsulta(${index})">Apagar Consulta</button>
+                        ` : ''}
+                      </li>
+                    `).join('')}
+                  </ul>
+                ` : `
+                  <p>Sem consultas agendadas</p>
+                `}
               </div>
               <div class="section">
-                <h2>Observações Médicas</h2>
-                ${currentProfile.observacoes.length > 0 ? `
-                  <ul>${currentProfile.observacoes.map(o => `<li>${o.data}: ${o.texto}</li>`).join('')}</ul>
-                ` : `<p>Sem observações médicas</p>`}
+                <h2>Observações Diárias</h2>
+                ${Array.isArray(currentProfile.observacoes) && currentProfile.observacoes.length > 0 ? `
+                  <ul>
+                    ${currentProfile.observacoes.map(o => `
+                      <li>${o.data}: ${o.texto}</li>
+                    `).join('')}
+                  </ul>
+                ` : `
+                  <p>Sem observações diárias</p>
+                `}
               </div>
               <div class="section">
                 <h2>Acompanhamento de Saúde</h2>
@@ -549,6 +621,12 @@
         `;
         updateChart();
       } else if (currentUser === "universitario") {
+        if (!currentProfile) {
+          console.error("currentProfile não está definido!");
+          currentUser = null;
+          render();
+          return;
+        }
         if (currentScreen === "main") {
           app.innerHTML = `
             <div class="panel">
@@ -584,8 +662,10 @@
                   <p class="menu-legend">Escolha uma ação para gerenciar consultas ou dados de saúde de estudantes.</p>
                   <div class="menu-grid">
                     <button onclick="currentScreen='addConsulta';render()">Agendar Consulta</button>
+                    <button onclick="currentScreen='manageConsultas';render()">Gerenciar Consultas</button>
                     <button onclick="currentScreen='addSaude';render()">Adicionar Dados de Saúde</button>
                     <button onclick="currentScreen='viewCharts';render()">Visualizar Gráficos</button>
+                    <button onclick="currentScreen='generateReport';render()">Gerar Relatório de Estudante</button>
                   </div>
                 </div>
               </div>
@@ -615,6 +695,24 @@
               </div>
             </div>
           `;
+        } else if (currentScreen === "manageConsultas") {
+          app.innerHTML = `
+            <div class="panel">
+              <div class="panel-content">
+                <h1>Painel do Universitário(a)</h1>
+                <div class="section">
+                  <h2>Gerenciar Consultas</h2>
+                  <input id="uni-manage-matricula" type="text" placeholder="Matrícula do Estudante">
+                  <button onclick="loadConsultas('uni')">Filtrar Consultas</button>
+                  <div id="consultas-list" style="margin-top: 1rem;"></div>
+                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
+                </div>
+              </div>
+              <div class="panel-footer">
+                <button class="logout" onclick="handleLogout()">Sair</button>
+              </div>
+            </div>
+          `;
         } else if (currentScreen === "addSaude") {
           app.innerHTML = `
             <div class="panel">
@@ -623,7 +721,7 @@
                 <div class="section">
                   <h2>Adição de Dados de Saúde para Estudantes</h2>
                   <input id="uni-saude-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <input id="uni-observacao" type="text" placeholder="Adicionar observação médica">
+                  <input id="uni-observacao" type="text" placeholder="Adicionar observação diária">
                   <input id="uni-pressao" type="text" placeholder="Pressão (ex: 120/80)">
                   <input id="uni-glicose" type="text" placeholder="Glicose (mg/dL)">
                   <input id="uni-temperatura" type="text" placeholder="Temperatura (°C)">
@@ -651,6 +749,23 @@
                   <div id="chart-container" class="chart-container">
                     <canvas id="healthChart"></canvas>
                   </div>
+                </div>
+              </div>
+              <div class="panel-footer">
+                <button class="logout" onclick="handleLogout()">Sair</button>
+              </div>
+            </div>
+          `;
+        } else if (currentScreen === "generateReport") {
+          app.innerHTML = `
+            <div class="panel">
+              <div class="panel-content">
+                <h1>Painel do Universitário(a)</h1>
+                <div class="section">
+                  <h2>Gerar Relatório de Estudante</h2>
+                  <input id="uni-report-matricula" type="text" placeholder="Matrícula do Estudante">
+                  <button onclick="generateStudentReport('uni')">Gerar Relatório</button>
+                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
                 </div>
               </div>
               <div class="panel-footer">
@@ -688,7 +803,7 @@
           document.getElementById("error").innerText = "";
           render();
         } else {
-          document.getElementById("error").innerText = "Matrícula ou senha incorretos!";
+          document.getElementById("error").innerText = "Matrícula ou senha inválidos!";
         }
       }
     }
@@ -837,7 +952,7 @@
           <div>
             <input id="edit-endereco" type="text" placeholder="Endereço" value="${user.endereco}">
             <input id="edit-escola" type="text" placeholder="Escola" value="${user.escola || ''}">
-            <input id="edit-telefone" type="text" placeholder="Telefone" value="${user.telefone}">
+            <input id="edit-telefone" type="text" placeholder="Telefone" value="${user.telefone || ''}">
             <select id="edit-tipo-sanguineo">
               <option value="A+" ${user.tipoSanguineo === "A+" ? "selected" : ""}>A+</option>
               <option value="A-" ${user.tipoSanguineo === "A-" ? "selected" : ""}>A-</option>
@@ -990,10 +1105,88 @@
         data,
         hora,
         tipo,
-        descricao
+        descricao,
+        status: null
       });
       currentScreen = "main";
       render();
+    }
+
+    function deleteConsulta(index) {
+      if (!currentProfile || !Array.isArray(currentProfile.consultas)) {
+        alert("Erro ao acessar as consultas!");
+        return;
+      }
+      const consulta = currentProfile.consultas[index];
+      if (!consulta) {
+        alert("Consulta não encontrada!");
+        return;
+      }
+      if (!isConsultaPassada(consulta)) {
+        alert("Apenas consultas passadas podem ser apagadas!");
+        return;
+      }
+      if (confirm("Confirmar exclusão da consulta?")) {
+        currentProfile.consultas.splice(index, 1);
+        const userIndex = users.findIndex(u => u.matricula === currentProfile.matricula);
+        if (userIndex !== -1) {
+          users[userIndex].consultas = currentProfile.consultas;
+        }
+        render();
+      }
+    }
+
+    function loadConsultas(prefix = '') {
+      const matricula = document.getElementById(`${prefix ? 'uni-' : ''}manage-matricula`)?.value;
+      const user = users.find(u => u.matricula === matricula && u.tipo === 'estudante');
+      const consultasList = document.getElementById('consultas-list');
+      if (!consultasList) {
+        alert("Erro ao carregar a lista de consultas!");
+        return;
+      }
+      if (!user) {
+        consultasList.innerHTML = '<p class="error">Estudante não encontrado!</p>';
+        return;
+      }
+      if (!Array.isArray(user.consultas) || user.consultas.length === 0) {
+        consultasList.innerHTML = '<p>Sem consultas agendadas.</p>';
+        return;
+      }
+      consultasList.innerHTML = `
+        <h3>Consultas de ${user.nome}</h3>
+        <ul>
+          ${user.consultas.map((consulta, index) => `
+            <li class="consulta-item">
+              ${formatarDataBrasileira(consulta.data)} ${consulta.hora} - ${consulta.tipo}: ${consulta.descricao}
+              <br>
+              <label><strong>Status:</strong>
+                <select class="status-select" onchange="updateConsultaStatus('${matricula}', ${index}, this.value)">
+                  <option value="" ${!consulta.status ? 'selected' : ''}>Sem Status</option>
+                  <option value="Compareceu" ${consulta.status === 'Compareceu' ? 'selected' : ''}>Compareceu</option>
+                  <option value="Não Compareceu" ${consulta.status === 'Não Compareceu' ? 'selected' : ''}>Não Compareceu</option>
+                </select>
+              </label>
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+
+    function updateConsultaStatus(matricula, index, status) {
+      const userIndex = users.findIndex(u => u.matricula === matricula && u.tipo === 'estudante');
+      if (userIndex === -1) {
+        alert("Estudante não encontrado!");
+        return;
+      }
+      if (!Array.isArray(users[userIndex].consultas) || !users[userIndex].consultas[index]) {
+        alert("Consulta não encontrada!");
+        return;
+      }
+      users[userIndex].consultas[index].status = status || null;
+      if (currentProfile && currentProfile.matricula === matricula) {
+        currentProfile.consultas = users[userIndex].consultas;
+      }
+      loadConsultas(currentUser === 'universitario' ? 'uni' : '');
     }
 
     function handleAddSaude(prefix = '') {
@@ -1066,7 +1259,10 @@
       }
 
       const ctx = matricula ? document.createElement('canvas').getContext('2d') : document.getElementById("healthChart")?.getContext("2d");
-      if (!ctx) return null;
+      if (!ctx) {
+        if (!matricula) alert("Erro ao carregar o canvas do gráfico!");
+        return null;
+      }
 
       const canvas = ctx.canvas;
       if (matricula) {
@@ -1074,19 +1270,48 @@
         canvas.height = 400;
       }
 
-      const labels = user.pressao.map(p => p.data);
-      const systolicData = user.pressao.map(p => {
-        const parts = p.valor.split('/');
-        return parts[0] ? parseInt(parts[0]) : 0;
+      // Ensure arrays are initialized
+      const pressao = Array.isArray(user.pressao) ? user.pressao : [];
+      const glicose = Array.isArray(user.glicose) ? user.glicose : [];
+      const temperatura = Array.isArray(user.temperatura) ? user.temperatura : [];
+      const batimentos = Array.isArray(user.batimentos) ? user.batimentos : [];
+      const oxigenacao = Array.isArray(user.oxigenacao) ? user.oxigenacao : [];
+
+      // Collect unique timestamps
+      const timestamps = new Set();
+      [pressao, glicose, temperatura, batimentos, oxigenacao].forEach(arr => {
+        arr.forEach(item => timestamps.add(item.data));
       });
-      const diastolicData = user.pressao.map(p => {
-        const parts = p.valor.split('/');
-        return parts[1] ? parseInt(parts[1]) : 0;
+      const labels = [...timestamps].sort((a, b) => {
+        const dateA = new Date(a.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+        const dateB = new Date(b.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+        return dateA - dateB;
       });
-      const glucoseData = user.glicose.map(g => parseFloat(g.valor) || 0);
-      const temperatureData = user.temperatura.map(t => parseFloat(t.valor) || 0);
-      const heartRateData = user.batimentos.map(b => parseInt(b.valor) || 0);
-      const oxygenData = user.oxigenacao.map(o => parseInt(o.valor) || 0);
+
+      const systolicData = labels.map(t => {
+        const p = pressao.find(p => p.data === t);
+        return p && p.valor ? parseInt(p.valor.split('/')[0]) || 0 : 0;
+      });
+      const diastolicData = labels.map(t => {
+        const p = pressao.find(p => p.data === t);
+        return p && p.valor ? parseInt(p.valor.split('/')[1]) || 0 : 0;
+      });
+      const glucoseData = labels.map(t => {
+        const g = glicose.find(g => g.data === t);
+        return g ? parseFloat(g.valor) || 0 : 0;
+      });
+      const temperatureData = labels.map(t => {
+        const temp = temperatura.find(temp => temp.data === t);
+        return temp ? parseFloat(temp.valor) || 0 : 0;
+      });
+      const heartRateData = labels.map(t => {
+        const b = batimentos.find(b => b.data === t);
+        return b ? parseInt(b.valor) || 0 : 0;
+      });
+      const oxygenData = labels.map(t => {
+        const o = oxigenacao.find(o => o.data === t);
+        return o ? parseInt(o.valor) || 0 : 0;
+      });
 
       chartInstance = new Chart(ctx, {
         type: "line",
@@ -1178,8 +1403,8 @@
       return null;
     }
 
-    async function generateStudentReport() {
-      const matricula = document.getElementById("report-matricula")?.value;
+    async function generateStudentReport(prefix = '') {
+      const matricula = document.getElementById(`${prefix ? prefix + '-' : ''}report-matricula`)?.value;
       if (!matricula) {
         alert("Por favor, insira a matrícula do estudante!");
         return;
@@ -1191,9 +1416,22 @@
       }
 
       let chartImage = null;
-      if (student.pressao.length > 0 || student.glicose.length > 0 || student.temperatura.length > 0 || 
-          student.batimentos.length > 0 || student.oxigenacao.length > 0) {
-        chartImage = await updateChart(matricula);
+      const hasHealthData = Array.isArray(student.pressao) && student.pressao.length > 0 ||
+                           Array.isArray(student.glicose) && student.glicose.length > 0 ||
+                           Array.isArray(student.temperatura) && student.temperatura.length > 0 ||
+                           Array.isArray(student.batimentos) && student.batimentos.length > 0 ||
+                           Array.isArray(student.oxigenacao) && student.oxigenacao.length > 0;
+
+      if (hasHealthData) {
+        try {
+          chartImage = await updateChart(matricula);
+          if (!chartImage) {
+            console.error("Falha ao gerar o gráfico para o relatório.");
+          }
+        } catch (error) {
+          console.error("Erro ao gerar gráfico:", error);
+          chartImage = null; // Prosseguir sem gráfico se houver erro
+        }
       }
 
       const { jsPDF } = window.jspdf;
@@ -1201,14 +1439,14 @@
 
       // Título
       doc.setFontSize(20);
-      doc.setTextColor(4, 120, 87); // Verde escuro (#047857)
+      doc.setTextColor(4, 120, 87);
       doc.text("Relatório de Estudante - TchêCuidaMeu", 105, 20, { align: "center" });
 
-      // Data
+      // Data e Horário
       doc.setFontSize(12);
-      doc.setTextColor(31, 42, 68); // Cinza escuro (#1f2a44)
-      const today = new Date().toLocaleDateString('pt-BR');
-      doc.text(`Gerado em: ${today}`, 105, 30, { align: "center" });
+      doc.setTextColor(14, 42, 68);
+      const now = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+      doc.text(`Gerado em: ${now}`, 105, 30, { align: "center" });
 
       // Estudante
       doc.setFontSize(16);
@@ -1232,77 +1470,84 @@
           ['Observação', student.observacao || 'Nenhuma']
         ],
         theme: 'striped',
-        headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] }, // Verde esmeralda
+        headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
         bodyStyles: { textColor: [31, 42, 68] },
         margin: { left: 20, right: 20 }
       });
 
-      // Consultas Agendadas
       let yPos = doc.lastAutoTable.finalY + 15;
-      doc.setFontSize(14);
-      doc.setTextColor(4, 120, 87);
-      doc.text("Consultas Agendadas", 20, yPos);
-      if (student.consultas.length > 0) {
+
+      // Consultas Agendadas
+      if (Array.isArray(student.consultas) && student.consultas.length > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(4, 120, 87);
+        doc.text("Consultas Agendadas", 20, yPos);
+        const sortedConsultas = [...student.consultas].sort((a, b) => {
+          const dateA = new Date(a.data + 'T' + a.hora);
+          const dateB = new Date(b.data + 'T' + b.hora);
+          return dateA - dateB;
+        });
         doc.autoTable({
           startY: yPos + 5,
-          head: [['Data', 'Hora', 'Médico/Especialidade', 'Descrição']],
-          body: student.consultas.map(c => [
+          head: [['Data', 'Hora', 'Médico/Especialidade', 'Descrição', 'Status']],
+          body: sortedConsultas.map(c => [
             formatarDataBrasileira(c.data),
             c.hora,
             c.tipo,
-            c.descricao
+            c.descricao,
+            c.status || 'Sem Status'
           ]),
           theme: 'striped',
           headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
           bodyStyles: { textColor: [31, 42, 68] },
           margin: { left: 20, right: 20 }
         });
-      } else {
-        doc.setFontSize(12);
-        doc.setTextColor(31, 42, 68);
-        doc.text("Nenhuma consulta agendada.", 20, yPos + 10);
+        yPos = doc.lastAutoTable.finalY + 15;
       }
 
-      // Observações Médicas
-      yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : yPos + 25;
-      doc.setFontSize(14);
-      doc.setTextColor(4, 120, 87);
-      doc.text("Observações Médicas", 20, yPos);
-      if (student.observacoes.length > 0) {
+      // Observações Diárias
+      if (Array.isArray(student.observacoes) && student.observacoes.length > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(4, 120, 87);
+        doc.text("Observações", 20, yPos);
+        const sortedObservacoes = [...student.observacoes].sort((a, b) => {
+          const dateA = new Date(a.data.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+          const dateB = new Date(b.data.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+          return dateA - dateB;
+        });
         doc.autoTable({
           startY: yPos + 5,
           head: [['Data', 'Observação']],
-          body: student.observacoes.map(o => [o.data, o.texto]),
+          body: sortedObservacoes.map(o => [o.data, o.texto]),
           theme: 'striped',
           headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
           bodyStyles: { textColor: [31, 42, 68] },
           margin: { left: 20, right: 20 }
         });
-      } else {
-        doc.setFontSize(12);
-        doc.setTextColor(31, 42, 68);
-        doc.text("Nenhuma observação médica.", 20, yPos + 10);
+        yPos = doc.lastAutoTable.finalY + 15;
       }
 
       // Acompanhamento de Saúde
-      yPos = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : yPos + 25;
-      doc.setFontSize(14);
-      doc.setTextColor(4, 120, 87);
-      doc.text("Acompanhamento de Saúde", 20, yPos);
-
-      // Tabela de Dados de Saúde
-      const hasHealthData = student.pressao.length > 0 || student.glicose.length > 0 || student.temperatura.length > 0 || 
-                           student.batimentos.length > 0 || student.oxigenacao.length > 0;
       if (hasHealthData) {
+        doc.setFontSize(14);
+        doc.setTextColor(4, 120, 87);
+        doc.text("Acompanhamento de Saúde", 20, yPos);
+
+        // Tabela de Dados de Saúde
         const healthDataRows = [];
-        const timestamps = new Set([
-          ...student.pressao.map(p => p.data),
-          ...student.glicose.map(g => g.data),
-          ...student.temperatura.map(t => t.data),
-          ...student.batimentos.map(b => b.data),
-          ...student.oxigenacao.map(o => o.data)
-        ]);
-        timestamps.forEach(timestamp => {
+        const timestamps = new Set();
+        const healthArrays = [student.pressao, student.glicose, student.temperatura, student.batimentos, student.oxigenacao];
+        healthArrays.forEach(arr => {
+          if (Array.isArray(arr)) {
+            arr.forEach(item => timestamps.add(item.data));
+          }
+        });
+        const sortedTimestamps = [...timestamps].sort((a, b) => {
+          const dateA = new Date(a.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+          const dateB = new Date(b.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
+          return dateA - dateB;
+        });
+        sortedTimestamps.forEach(timestamp => {
           const row = [
             timestamp,
             student.pressao.find(p => p.data === timestamp)?.valor || '-',
@@ -1313,34 +1558,40 @@
           ];
           healthDataRows.push(row);
         });
-        doc.autoTable({
-          startY: yPos + 5,
-          head: [['Data', 'Pressão (mmHg)', 'Glicose (mg/dL)', 'Temperatura (°C)', 'Batimentos (BPM)', 'Oxigenação (%)']],
-          body: healthDataRows,
-          theme: 'striped',
-          headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-          bodyStyles: { textColor: [31, 42, 68] },
-          margin: { left: 20, right: 20 }
-        });
-        yPos = doc.lastAutoTable.finalY + 15;
-      } else {
-        doc.setFontSize(12);
-        doc.setTextColor(31, 42, 68);
-        doc.text("Nenhum dado de saúde disponível.", 20, yPos + 10);
-        yPos += 15;
-      }
+        if (healthDataRows.length > 0) {
+          doc.autoTable({
+            startY: yPos + 5,
+            head: [['Data', 'Pressão (mmHg)', 'Glicose (mg/dL)', 'Temperatura (°C)', 'Batimentos (BPM)', 'Oxigenação (%)']],
+            body: healthDataRows,
+            theme: 'striped',
+            headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
+            bodyStyles: { textColor: [31, 55, 68] },
+            margin: { left: 20, right: 20 }
+          });
+          yPos = doc.lastAutoTable.finalY + 15;
+        }
 
-      // Gráfico de Saúde
-      if (chartImage) {
-        const imgWidth = 170; // mm
-        const imgHeight = imgWidth * (400 / 600); // Maintain aspect ratio
-        doc.addImage(chartImage, 'PNG', 20, yPos, imgWidth, imgHeight);
-        doc.setFontSize(10);
-        doc.text(`Gráfico de saúde para ${student.nome}`, 105, yPos + imgHeight + 10, { align: "center" });
+        // Gráfico de Saúde
+        if (chartImage) {
+          try {
+            const imgWidth = 170; // mm
+            const imgHeight = imgWidth * (400 / 600); // Proporção
+            doc.addImage(chartImage, 'PNG', 20, yPos, imgWidth, imgHeight);
+            doc.setFontSize(10);
+            doc.text(`Gráfico de saúde para ${student.nome}`, 105, yPos + imgHeight + 10, { align: "center" });
+          } catch (error) {
+            console.error("Erro ao adicionar gráfico ao PDF:", error);
+          }
+        }
       }
 
       // Salvar PDF
-      doc.save(`relatorio_estudante_${matricula}.pdf`);
+      try {
+        doc.save(`relatorio_estudante_${matricula}.pdf`);
+      } catch (error) {
+        console.error("Erro ao salvar PDF:", error);
+        alert("Erro ao gerar o PDF. Verifique o console para detalhes.");
+      }
     }
 
     try {
