@@ -1,1604 +1,533 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TchêCuidaMeu</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-500: #10b981; /* Verde esmeralda */
-      --primary-700: #047857; /* Verde escuro */
-      --primary-100: #d1fae5; /* Verde claro */
-      --neutral-50: #f8fafc; /* Fundo claro */
-      --neutral-900: #1f2a44; /* Texto escuro */
-      --accent-500: #f59e0b; /* Amarelo para gráficos */
-      --error-500: #ef4444; /* Vermelho para erros e sair */
-      --neutral-200: #e5e7eb; /* Bordas e fundos */
-      --neutral-600: #4b5563; /* Cinza para botões voltar */
-      --neutral-400: #9ca3af; /* Cinza para texto de boas-vindas */
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background-color: var(--neutral-50);
-      font-family: 'Inter', sans-serif;
-      color: var(--neutral-900);
-      line-height: 1.5;
-    }
-    .container {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-    }
-    .login-box, .panel {
-      background-color: #ffffff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      width: 100%;
-      max-width: 360px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .panel {
-      max-width: 960px;
-      min-height: 600px;
-      display: flex;
-      flex-direction: column;
-    }
-    .panel:hover {
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-    }
-    .panel-content {
-      flex: 1;
-    }
-    .panel-footer {
-      margin-top: 1.5rem;
-      text-align: right;
-    }
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      color: var(--primary-700);
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    h2 {
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: var(--primary-700);
-      margin-bottom: 1rem;
-    }
-    .welcome-text {
-      color: var(--neutral-400);
-      font-size: 0.875rem;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .menu-legend {
-      color: var(--neutral-600);
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      border: 1px solid var(--neutral-200);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary-500);
-      box-shadow: 0 0 0 3px var(--primary-100);
-    }
-    button {
-      background-color: var(--primary-500);
-      color: #ffffff;
-      border: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
-    button:hover {
-      background-color: var(--primary-700);
-      transform: translateY(-1px);
-    }
-    button:active {
-      transform: translateY(0);
-    }
-    button.logout {
-      background-color: var(--error-500);
-    }
-    button.logout:hover {
-      background-color: #dc2626;
-    }
-    button.back {
-      background-color: var(--neutral-600);
-    }
-    button.back:hover {
-      background-color: #374151;
-    }
-    button.delete {
-      background-color: var(--error-500);
-      margin-top: 0.5rem;
-    }
-    button.delete:hover {
-      background-color: #dc2626;
-    }
-    .error {
-      color: var(--error-500);
-      text-align: center;
-      margin-top: 0.75rem;
-      font-size: 0.875rem;
-    }
-    ul {
-      list-style-type: disc;
-      padding-left: 1.5rem;
-      margin-top: 0.75rem;
-    }
-    .chart-container {
-      max-width: 100%;
-      height: 300px;
-      margin-top: 1.5rem;
-    }
-    .profile-pic {
-      width: 120px;
-      height: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 1px solid var(--neutral-200);
-    }
-    .section {
-      margin-top: 1.5rem;
-      padding: 1.5rem;
-      border: 1px solid var(--neutral-200);
-      border-radius: 8px;
-      background-color: #ffffff;
-    }
-    .profile-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      align-items: flex-start;
-    }
-    .profile-info {
-      flex: 1;
-      min-width: 200px;
-    }
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    .menu-grid button {
-      padding: 1rem;
-      font-size: 1rem;
-      border-radius: 8px;
-    }
-    .consulta-item {
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      border-left: 3px solid var(--primary-500);
-    }
-    .status-select {
-      width: auto;
-      display: inline-block;
-      margin-left: 0.5rem;
-    }
-    @media (max-width: 640px) {
-      .login-box, .panel {
-        padding: 1.25rem;
-        max-width: 95%;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
-      h2 {
-        font-size: 1.125rem;
-      }
-      .chart-container {
-        height: 240px;
-      }
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
-      .profile-container {
-        flex-direction: column;
-      }
-      .menu-grid {
-        grid-template-columns: 1fr;
-      }
-      .status-select {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 0.5rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EfraChat - Chat Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #11052c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4c1d95, #1e1b4b);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #a855f7, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .username-section {
+            margin-bottom: 30px;
+        }
+
+        .username-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .username-section input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 14px;
+        }
+
+        .username-section input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .online-users {
+            flex: 1;
+        }
+
+        .online-users h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .user-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #2d1b69, #4c1d95);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            font-size: 20px;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #4c1d95;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4c1d95;
+        }
+
+        .message-form {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .message-input:focus {
+            border-color: #4c1d95;
+        }
+
+        .send-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #4c1d95, #1e1b4b);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #5b21b6, #312e81);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #059669;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .online-users {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="app" class="container"></div>
-  <script>
-    // Dados mockados
-    let users = [
-      {
-        matricula: "12345",
-        senha: "0102",
-        nome: "João Silva",
-        responsavel: "Maria Silva",
-        endereco: "Rua Exemplo, 123, Porto Alegre, RS",
-        escola: "Escola Municipal Exemplo",
-        telefone: "(51) 99999-9999",
-        tipoSanguineo: "O+",
-        observacao: "Estudante com necessidade de acompanhamento regular",
-        foto: null,
-        consultas: [],
-        observacoes: [],
-        pressao: [],
-        glicose: [],
-        temperatura: [],
-        batimentos: [],
-        oxigenacao: [],
-        tipo: "estudante"
-      },
-      {
-        matricula: "123",
-        senha: "123",
-        nome: "Ana Pereira",
-        email: "ana.pereira@example.com",
-        telefone: "(51) 98888-8888",
-        instituicao: "UFRGS",
-        curso: "Medicina",
-        dataNascimento: "1998-05-15",
-        foto: null,
-        consultas: [],
-        observacoes: [],
-        pressao: [],
-        glicose: [],
-        temperatura: [],
-        batimentos: [],
-        oxigenacao: [],
-        tipo: "universitario"
-      }
-    ];
-    let currentUser = null;
-    let currentProfile = null;
-    let currentScreen = "main";
-
-    function formatarDataBrasileira(dataISO) {
-      if (!dataISO) return "";
-      const [ano, mes, dia] = dataISO.split("-");
-      return `${dia}/${mes}/${ano}`;
-    }
-
-    function isConsultaPassada(consulta) {
-      if (!consulta.data || !consulta.hora) return false;
-      const consultaDate = new Date(`${consulta.data}T${consulta.hora}`);
-      const now = new Date();
-      return consultaDate < now;
-    }
-
-    function render() {
-      const app = document.getElementById("app");
-      if (!app) {
-        console.error("Elemento #app não encontrado!");
-        return;
-      }
-      if (!currentUser) {
-        app.innerHTML = `
-          <div class="login-box">
-            <h1>TchêCuidaMeu</h1>
-            <p class="welcome-text">Bem-vindo ao sistema de gestão de saúde escolar!</p>
-            <div id="error" class="error"></div>
-            <div style="margin-top: 1.5rem;">
-              <h2>Login</h2>
-              <select id="user-type">
-                <option value="admin">Administrador</option>
-                <option value="estudante">Estudante</option>
-                <option value="universitario">Universitário(a)</option>
-              </select>
-              <input id="login-id" type="text" placeholder="Usuário ou Matrícula">
-              <input id="login-pass" type="password" placeholder="Senha">
-              <button onclick="handleLogin()">Entrar</button>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>EfraChat</h1>
+                <p>Chat em tempo real</p>
             </div>
-          </div>
-        `;
-      } else if (currentUser === "admin") {
-        if (currentScreen === "main") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Menu de Ações</h2>
-                  <p class="menu-legend">Selecione uma ação para gerenciar perfis, consultas ou dados de saúde.</p>
-                  <div class="menu-grid">
-                    <button onclick="currentScreen='addEstudante';render()">Cadastrar Estudante</button>
-                    <button onclick="currentScreen='addUniversitario';render()">Cadastrar Universitário(a)</button>
-                    <button onclick="currentScreen='editProfile';render()">Editar Perfil</button>
-                    <button onclick="currentScreen='addConsulta';render()">Agendar Consulta</button>
-                    <button onclick="currentScreen='manageConsultas';render()">Gerenciar Consultas</button>
-                    <button onclick="currentScreen='addSaude';render()">Adicionar Dados de Saúde</button>
-                    <button onclick="currentScreen='viewCharts';render()">Visualizar Gráficos</button>
-                    <button onclick="currentScreen='generateReport';render()">Gerar Relatório por Matrícula (Estudante)</button>
-                  </div>
+            
+            <div class="username-section">
+                <label for="username">Seu nome:</label>
+                <input type="text" id="username" placeholder="Digite seu nome..." maxlength="20">
+            </div>
+            
+            <div class="online-users">
+                <h3><span class="status-indicator"></span>Online (<span id="user-count">0</span>)</h3>
+                <div class="user-list" id="user-list">
+                    <div class="user-item">Nenhum usuário online</div>
                 </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
             </div>
-          `;
-        } else if (currentScreen === "generateReport") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Gerar Relatório de Estudante</h2>
-                  <input id="report-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <button onclick="generateStudentReport()">Gerar Relatório</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
+        </div>
+        
+        <div class="main-chat">
+            <div class="chat-header">
+                <h2>💬 Conversa Principal</h2>
             </div>
-          `;
-        } else if (currentScreen === "addEstudante") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Cadastro de Novo Estudante</h2>
-                  <div class="info-grid">
-                    <div>
-                      <input id="new-matricula" type="text" placeholder="Matrícula">
-                      <input id="new-nome" type="text" placeholder="Nome">
-                      <input id="new-senha" type="password" placeholder="Senha">
-                      <input id="new-responsavel" type="text" placeholder="Responsável">
+            
+            <div class="messages-container" id="messages">
+                <div class="message">
+                    <div class="message-header">
+                        <span class="username">Sistema</span>
+                        <span class="timestamp" id="welcome-time"></span>
                     </div>
-                    <div>
-                      <input id="new-endereco" type="text" placeholder="Endereço">
-                      <input id="new-escola" type="text" placeholder="Escola">
-                      <input id="new-telefone" type="text" placeholder="Telefone">
-                      <select id="new-tipo-sanguineo">
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                        <option value="-">-</option>
-                      </select>
-                      <input id="new-observacao" type="text" placeholder="Observação">
-                      <input id="new-foto" type="file" accept="image/*">
+                    <div class="message-content">
+                        Bem-vindo ao EfraChat! Digite seu nome e comece a conversar. ⚠️ <strong>Atenção:</strong> Este chat funciona apenas em memória - todas as mensagens serão perdidas ao fechar a página.
                     </div>
-                  </div>
-                  <button onclick="handleAddEstudante()">Cadastrar Estudante</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
                 </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
             </div>
-          `;
-        } else if (currentScreen === "addUniversitario") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Cadastro de Novo Universitário(a)</h2>
-                  <div class="info-grid">
-                    <div>
-                      <input id="uni-matricula" type="text" placeholder="Matrícula">
-                      <input id="uni-senha" type="password" placeholder="Senha">
-                      <input id="uni-nome" type="text" placeholder="Nome">
-                      <input id="uni-email" type="email" placeholder="E-mail">
-                      <input id="uni-telefone" type="text" placeholder="Telefone">
-                    </div>
-                    <div>
-                      <input id="uni-instituicao" type="text" placeholder="Instituição">
-                      <input id="uni-curso" type="text" placeholder="Curso">
-                      <input id="uni-data-nascimento" type="date" placeholder="Data de Nascimento">
-                      <input id="uni-foto" type="file" accept="image/*">
-                    </div>
-                  </div>
-                  <button onclick="handleAddUniversitario()">Cadastrar Universitário(a)</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
+            
+            <div class="message-form">
+                <input type="text" class="message-input" id="message-input" 
+                       placeholder="Digite sua mensagem..." maxlength="500">
+                <button class="send-btn" onclick="sendMessage()">Enviar</button>
             </div>
-          `;
-        } else if (currentScreen === "editProfile") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Editar Perfil</h2>
-                  <input id="edit-matricula" type="text" placeholder="Matrícula do Aluno">
-                  <button onclick="loadEditForm()">Carregar Perfil</button>
-                  <div id="edit-form" style="display: none;">
-                    <h3 id="edit-title"></h3>
-                    <div class="info-grid" id="edit-fields"></div>
-                    <button onclick="handleEditProfile()">Salvar Alterações</button>
-                    <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                  </div>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "addConsulta") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Agendamento de Consultas</h2>
-                  <input id="consulta-matricula" type="text" placeholder="Matrícula do Aluno">
-                  <input id="consulta-data" type="date">
-                  <input id="consulta-hora" type="time">
-                  <input id="consulta-tipo" type="text" placeholder="Médico ou Especialidade">
-                  <input id="consulta-descricao" type="text" placeholder="Descrição da Consulta">
-                  <button onclick="handleAddConsulta()">Agendar Consulta</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "manageConsultas") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Gerenciar Consultas</h2>
-                  <input id="manage-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <button onclick="loadConsultas()">Filtrar Consultas</button>
-                  <div id="consultas-list" style="margin-top: 1rem;"></div>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "addSaude") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Adição de Dados de Saúde</h2>
-                  <input id="saude-matricula" type="text" placeholder="Matrícula do Aluno">
-                  <input id="observacao" type="text" placeholder="Adicionar observação médica">
-                  <input id="pressao" type="text" placeholder="Pressão (ex: 120/80)">
-                  <input id="glicose" type="text" placeholder="Glicose (mg/dL)">
-                  <input id="temperatura" type="text" placeholder="Temperatura (°C)">
-                  <input id="batimentos" type="text" placeholder="Batimentos Cardíacos (BPM)">
-                  <input id="oxigenacao" type="text" placeholder="Oxigenação (%)">
-                  <button onclick="handleAddSaude()">Adicionar Dados</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "viewCharts") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Administrador</h1>
-                <div class="section">
-                  <h2>Visualização de Gráficos</h2>
-                  <input id="chart-matricula" type="text" placeholder="Matrícula do Aluno">
-                  <button onclick="updateChart()">Atualizar Gráfico</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                  <div id="chart-container" class="chart-container">
-                    <canvas id="healthChart"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
+        </div>
+    </div>
+
+    <script>
+        // Dados em memória (perdidos quando a página é fechada)
+        let messages = [];
+        let onlineUsers = new Set(); // Usando Set para evitar duplicatas
+        let username = '';
+        let lastMessageCount = 0;
+        let userActivityTimeout = new Map(); // Para controlar timeout dos usuários
+
+        // Configura o horário da mensagem de boas-vindas
+        document.getElementById('welcome-time').textContent = new Date().toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Função para mostrar mensagens de erro/sucesso
+        function showMessage(text, type = 'error') {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
         }
-      } else if (currentUser === "estudante") {
-        if (!currentProfile) {
-          console.error("currentProfile não está definido!");
-          currentUser = null;
-          render();
-          return;
-        }
-        app.innerHTML = `
-          <div class="panel">
-            <div class="panel-content">
-              <h1>Painel do Estudante</h1>
-              <div class="section">
-                <h2>Dados Cadastrais</h2>
-                <div class="profile-container">
-                  ${currentProfile.foto ? `
-                    <img src="${currentProfile.foto}" alt="Foto de perfil" class="profile-pic">
-                  ` : `
-                    <p>Sem foto de perfil</p>
-                  `}
-                  <div class="profile-info">
-                    <div class="info-grid">
-                      <div>
-                        <p><strong>Nome:</strong> ${currentProfile.nome}</p>
-                        <p><strong>Responsável:</strong> ${currentProfile.responsavel}</p>
-                        <p><strong>Telefone:</strong> ${currentProfile.telefone}</p>
-                        <p><strong>Endereço:</strong> ${currentProfile.endereco}</p>
-                        <p><strong>Tipo Sanguíneo:</strong> ${currentProfile.tipoSanguineo}</p>
-                      </div>
-                      <div>
-                        <p><strong>Matrícula:</strong> ${currentProfile.matricula}</p>
-                        <p><strong>Escola:</strong> ${currentProfile.escola || "Não informado"}</p>
-                        <p><strong>Observação:</strong> ${currentProfile.observacao || "Nenhuma"}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="section">
-                <h2>Consultas Agendadas</h2>
-                ${Array.isArray(currentProfile.consultas) && currentProfile.consultas.length > 0 ? `
-                  <ul>
-                    ${currentProfile.consultas.map((c, index) => `
-                      <li class="consulta-item">
-                        ${formatarDataBrasileira(c.data)} ${c.hora} - ${c.tipo}: ${c.descricao}
-                        ${c.status ? `<br><strong>Status:</strong> ${c.status}` : ''}
-                        ${isConsultaPassada(c) ? `
-                          <br><button class="delete" onclick="deleteConsulta(${index})">Apagar Consulta</button>
-                        ` : ''}
-                      </li>
-                    `).join('')}
-                  </ul>
-                ` : `
-                  <p>Sem consultas agendadas</p>
-                `}
-              </div>
-              <div class="section">
-                <h2>Observações Diárias</h2>
-                ${Array.isArray(currentProfile.observacoes) && currentProfile.observacoes.length > 0 ? `
-                  <ul>
-                    ${currentProfile.observacoes.map(o => `
-                      <li>${o.data}: ${o.texto}</li>
-                    `).join('')}
-                  </ul>
-                ` : `
-                  <p>Sem observações diárias</p>
-                `}
-              </div>
-              <div class="section">
-                <h2>Acompanhamento de Saúde</h2>
-                <div id="chart-container" class="chart-container">
-                  <canvas id="healthChart"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="panel-footer">
-              <button class="logout" onclick="handleLogout()">Sair</button>
-            </div>
-          </div>
-        `;
-        updateChart();
-      } else if (currentUser === "universitario") {
-        if (!currentProfile) {
-          console.error("currentProfile não está definido!");
-          currentUser = null;
-          render();
-          return;
-        }
-        if (currentScreen === "main") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Informações Pessoais</h2>
-                  <div class="profile-container">
-                    ${currentProfile.foto ? `
-                      <img src="${currentProfile.foto}" alt="Foto de perfil" class="profile-pic">
-                    ` : `
-                      <p>Sem foto de perfil</p>
-                    `}
-                    <div class="profile-info">
-                      <div class="info-grid">
-                        <div>
-                          <p><strong>Nome:</strong> ${currentProfile.nome}</p>
-                          <p><strong>Matrícula:</strong> ${currentProfile.matricula}</p>
-                          <p><strong>E-mail:</strong> ${currentProfile.email}</p>
-                          <p><strong>Telefone:</strong> ${currentProfile.telefone || "Não informado"}</p>
-                        </div>
-                        <div>
-                          <p><strong>Instituição:</strong> ${currentProfile.instituicao || "Não informado"}</p>
-                          <p><strong>Curso:</strong> ${currentProfile.curso || "Não informado"}</p>
-                          <p><strong>Data de Nascimento:</strong> ${formatarDataBrasileira(currentProfile.dataNascimento)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="section">
-                  <h2>Menu de Ações</h2>
-                  <p class="menu-legend">Escolha uma ação para gerenciar consultas ou dados de saúde de estudantes.</p>
-                  <div class="menu-grid">
-                    <button onclick="currentScreen='addConsulta';render()">Agendar Consulta</button>
-                    <button onclick="currentScreen='manageConsultas';render()">Gerenciar Consultas</button>
-                    <button onclick="currentScreen='addSaude';render()">Adicionar Dados de Saúde</button>
-                    <button onclick="currentScreen='viewCharts';render()">Visualizar Gráficos</button>
-                    <button onclick="currentScreen='generateReport';render()">Gerar Relatório de Estudante</button>
-                  </div>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "addConsulta") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Agendamento de Consultas para Estudantes</h2>
-                  <input id="uni-consulta-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <input id="uni-consulta-data" type="date">
-                  <input id="uni-consulta-hora" type="time">
-                  <input id="uni-consulta-tipo" type="text" placeholder="Médico ou Especialidade">
-                  <input id="uni-consulta-descricao" type="text" placeholder="Descrição da Consulta">
-                  <button onclick="handleAddConsulta('uni')">Agendar Consulta</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "manageConsultas") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Gerenciar Consultas</h2>
-                  <input id="uni-manage-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <button onclick="loadConsultas('uni')">Filtrar Consultas</button>
-                  <div id="consultas-list" style="margin-top: 1rem;"></div>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "addSaude") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Adição de Dados de Saúde para Estudantes</h2>
-                  <input id="uni-saude-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <input id="uni-observacao" type="text" placeholder="Adicionar observação diária">
-                  <input id="uni-pressao" type="text" placeholder="Pressão (ex: 120/80)">
-                  <input id="uni-glicose" type="text" placeholder="Glicose (mg/dL)">
-                  <input id="uni-temperatura" type="text" placeholder="Temperatura (°C)">
-                  <input id="uni-batimentos" type="text" placeholder="Batimentos Cardíacos (BPM)">
-                  <input id="uni-oxigenacao" type="text" placeholder="Oxigenação (%)">
-                  <button onclick="handleAddSaude('uni')">Adicionar Dados</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "viewCharts") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Visualização de Gráficos</h2>
-                  <input id="uni-chart-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <button onclick="updateChart()">Atualizar Gráfico</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                  <div id="chart-container" class="chart-container">
-                    <canvas id="healthChart"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        } else if (currentScreen === "generateReport") {
-          app.innerHTML = `
-            <div class="panel">
-              <div class="panel-content">
-                <h1>Painel do Universitário(a)</h1>
-                <div class="section">
-                  <h2>Gerar Relatório de Estudante</h2>
-                  <input id="uni-report-matricula" type="text" placeholder="Matrícula do Estudante">
-                  <button onclick="generateStudentReport('uni')">Gerar Relatório</button>
-                  <button class="back" onclick="currentScreen='main';render()">Voltar</button>
-                </div>
-              </div>
-              <div class="panel-footer">
-                <button class="logout" onclick="handleLogout()">Sair</button>
-              </div>
-            </div>
-          `;
-        }
-      }
-    }
 
-    function handleLogin() {
-      const userType = document.getElementById("user-type")?.value;
-      const loginId = document.getElementById("login-id")?.value;
-      const loginPass = document.getElementById("login-pass")?.value;
-      if (!loginId || !loginPass) {
-        document.getElementById("error").innerText = "Preencha todos os campos!";
-        return;
-      }
-      if (userType === "admin") {
-        if (loginId === "admin" && loginPass === "admin") {
-          currentUser = "admin";
-          currentScreen = "main";
-          document.getElementById("error").innerText = "";
-          render();
-        } else {
-          document.getElementById("error").innerText = "Usuário ou senha incorretos!";
-        }
-      } else {
-        const profile = users.find(s => s.matricula === loginId && s.senha === loginPass && s.tipo === userType);
-        if (profile) {
-          currentUser = userType;
-          currentProfile = profile;
-          currentScreen = "main";
-          document.getElementById("error").innerText = "";
-          render();
-        } else {
-          document.getElementById("error").innerText = "Matrícula ou senha inválidos!";
-        }
-      }
-    }
-
-    function handleLogout() {
-      currentUser = null;
-      currentProfile = null;
-      currentScreen = "main";
-      render();
-    }
-
-    function handleAddEstudante() {
-      const matricula = document.getElementById("new-matricula")?.value;
-      const nome = document.getElementById("new-nome")?.value;
-      const senha = document.getElementById("new-senha")?.value;
-      const responsavel = document.getElementById("new-responsavel")?.value;
-      const endereco = document.getElementById("new-endereco")?.value;
-      const escola = document.getElementById("new-escola")?.value;
-      const telefone = document.getElementById("new-telefone")?.value;
-      const tipoSanguineo = document.getElementById("new-tipo-sanguineo")?.value;
-      const observacao = document.getElementById("new-observacao")?.value;
-      const fileInput = document.getElementById("new-foto");
-      if (!matricula || !nome || !senha || !responsavel || !endereco || !escola || !telefone || !tipoSanguineo) {
-        alert("Preencha todos os campos obrigatórios!");
-        return;
-      }
-      if (users.find(s => s.matricula === matricula)) {
-        alert("Matrícula já cadastrada!");
-        return;
-      }
-      const newEstudante = {
-        matricula,
-        senha,
-        nome,
-        responsavel,
-        endereco,
-        escola,
-        telefone,
-        tipoSanguineo,
-        observacao,
-        foto: null,
-        consultas: [],
-        observacoes: [],
-        pressao: [],
-        glicose: [],
-        temperatura: [],
-        batimentos: [],
-        oxigenacao: [],
-        tipo: "estudante"
-      };
-      if (fileInput?.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          newEstudante.foto = e.target.result;
-          users.push(newEstudante);
-          currentScreen = "main";
-          render();
-        };
-        reader.onerror = function() {
-          alert("Erro ao carregar a foto!");
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        users.push(newEstudante);
-        currentScreen = "main";
-        render();
-      }
-    }
-
-    function handleAddUniversitario() {
-      const matricula = document.getElementById("uni-matricula")?.value;
-      const senha = document.getElementById("uni-senha")?.value;
-      const nome = document.getElementById("uni-nome")?.value;
-      const email = document.getElementById("uni-email")?.value;
-      const telefone = document.getElementById("uni-telefone")?.value;
-      const instituicao = document.getElementById("uni-instituicao")?.value;
-      const curso = document.getElementById("uni-curso")?.value;
-      const dataNascimento = document.getElementById("uni-data-nascimento")?.value;
-      const fileInput = document.getElementById("uni-foto");
-      if (!matricula || !senha || !nome || !email || !telefone || !instituicao || !curso || !dataNascimento) {
-        alert("Preencha todos os campos obrigatórios!");
-        return;
-      }
-      if (users.find(s => s.matricula === matricula)) {
-        alert("Matrícula já cadastrada!");
-        return;
-      }
-      const newUniversitario = {
-        matricula,
-        senha,
-        nome,
-        email,
-        telefone,
-        instituicao,
-        curso,
-        dataNascimento,
-        foto: null,
-        consultas: [],
-        observacoes: [],
-        pressao: [],
-        glicose: [],
-        temperatura: [],
-        batimentos: [],
-        oxigenacao: [],
-        tipo: "universitario"
-      };
-      if (fileInput?.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          newUniversitario.foto = e.target.result;
-          users.push(newUniversitario);
-          currentScreen = "main";
-          render();
-        };
-        reader.onerror = function() {
-          alert("Erro ao carregar a foto!");
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        users.push(newUniversitario);
-        currentScreen = "main";
-        render();
-      }
-    }
-
-    function loadEditForm() {
-      const matricula = document.getElementById("edit-matricula")?.value;
-      const user = users.find(s => s.matricula === matricula);
-      if (!user) {
-        alert("Usuário não encontrado!");
-        return;
-      }
-      const editForm = document.getElementById("edit-form");
-      const editTitle = document.getElementById("edit-title");
-      const editFields = document.getElementById("edit-fields");
-      editForm.style.display = "block";
-      if (user.tipo === "estudante") {
-        editTitle.innerHTML = "Editar Estudante";
-        editFields.innerHTML = `
-          <div>
-            <input id="edit-matricula" type="text" placeholder="Matrícula" value="${user.matricula}" readonly>
-            <input id="edit-nome" type="text" placeholder="Nome" value="${user.nome}">
-            <input id="edit-senha" type="password" placeholder="Senha" value="${user.senha}">
-            <input id="edit-responsavel" type="text" placeholder="Responsável" value="${user.responsavel}">
-          </div>
-          <div>
-            <input id="edit-endereco" type="text" placeholder="Endereço" value="${user.endereco}">
-            <input id="edit-escola" type="text" placeholder="Escola" value="${user.escola || ''}">
-            <input id="edit-telefone" type="text" placeholder="Telefone" value="${user.telefone || ''}">
-            <select id="edit-tipo-sanguineo">
-              <option value="A+" ${user.tipoSanguineo === "A+" ? "selected" : ""}>A+</option>
-              <option value="A-" ${user.tipoSanguineo === "A-" ? "selected" : ""}>A-</option>
-              <option value="B+" ${user.tipoSanguineo === "B+" ? "selected" : ""}>B+</option>
-              <option value="B-" ${user.tipoSanguineo === "B-" ? "selected" : ""}>B-</option>
-              <option value="AB+" ${user.tipoSanguineo === "AB+" ? "selected" : ""}>AB+</option>
-              <option value="AB-" ${user.tipoSanguineo === "AB-" ? "selected" : ""}>AB-</option>
-              <option value="O+" ${user.tipoSanguineo === "O+" ? "selected" : ""}>O+</option>
-              <option value="O-" ${user.tipoSanguineo === "O-" ? "selected" : ""}>O-</option>
-              <option value="-" ${user.tipoSanguineo === "-" ? "selected" : ""}>-</option>
-            </select>
-            <input id="edit-observacao" type="text" placeholder="Observação" value="${user.observacao || ''}">
-            <input id="edit-foto" type="file" accept="image/*">
-          </div>
-        `;
-      } else if (user.tipo === "universitario") {
-        editTitle.innerHTML = "Editar Universitário(a)";
-        editFields.innerHTML = `
-          <div>
-            <input id="edit-matricula" type="text" placeholder="Matrícula" value="${user.matricula}" readonly>
-            <input id="edit-senha" type="password" placeholder="Senha" value="${user.senha}">
-            <input id="edit-nome" type="text" placeholder="Nome" value="${user.nome}">
-            <input id="edit-email" type="email" placeholder="E-mail" value="${user.email}">
-            <input id="edit-telefone" type="text" placeholder="Telefone" value="${user.telefone || ''}">
-          </div>
-          <div>
-            <input id="edit-instituicao" type="text" placeholder="Instituição" value="${user.instituicao || ''}">
-            <input id="edit-curso" type="text" placeholder="Curso" value="${user.curso || ''}">
-            <input id="edit-data-nascimento" type="date" placeholder="Data de Nascimento" value="${user.dataNascimento}">
-            <input id="edit-foto" type="file" accept="image/*">
-          </div>
-        `;
-      }
-    }
-
-    function handleEditProfile() {
-      const matricula = document.getElementById("edit-matricula")?.value;
-      const userIndex = users.findIndex(s => s.matricula === matricula);
-      if (userIndex === -1) {
-        alert("Usuário não encontrado!");
-        return;
-      }
-      const user = users[userIndex];
-      const fileInput = document.getElementById("edit-foto");
-      const editForm = document.getElementById("edit-form");
-
-      if (user.tipo === "estudante") {
-        const nome = document.getElementById("edit-nome")?.value;
-        const senha = document.getElementById("edit-senha")?.value;
-        const responsavel = document.getElementById("edit-responsavel")?.value;
-        const endereco = document.getElementById("edit-endereco")?.value;
-        const escola = document.getElementById("edit-escola")?.value;
-        const telefone = document.getElementById("edit-telefone")?.value;
-        const tipoSanguineo = document.getElementById("edit-tipo-sanguineo")?.value;
-        const observacao = document.getElementById("edit-observacao")?.value;
-        if (!nome || !senha || !responsavel || !endereco || !escola || !telefone || !tipoSanguineo) {
-          alert("Preencha todos os campos obrigatórios!");
-          return;
-        }
-        const updatedEstudante = {
-          ...user,
-          nome,
-          senha,
-          responsavel,
-          endereco,
-          escola,
-          telefone,
-          tipoSanguineo,
-          observacao
-        };
-        if (fileInput?.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            updatedEstudante.foto = e.target.result;
-            users[userIndex] = updatedEstudante;
-            if (editForm) editForm.style.display = "none";
-            currentScreen = "main";
-            render();
-          };
-          reader.onerror = function() {
-            alert("Erro ao carregar a foto!");
-          };
-          reader.readAsDataURL(fileInput.files[0]);
-        } else {
-          users[userIndex] = updatedEstudante;
-          if (editForm) editForm.style.display = "none";
-          currentScreen = "main";
-          render();
-        }
-      } else if (user.tipo === "universitario") {
-        const senha = document.getElementById("edit-senha")?.value;
-        const nome = document.getElementById("edit-nome")?.value;
-        const email = document.getElementById("edit-email")?.value;
-        const telefone = document.getElementById("edit-telefone")?.value;
-        const instituicao = document.getElementById("edit-instituicao")?.value;
-        const curso = document.getElementById("edit-curso")?.value;
-        const dataNascimento = document.getElementById("edit-data-nascimento")?.value;
-        if (!senha || !nome || !email || !telefone || !instituicao || !curso || !dataNascimento) {
-          alert("Preencha todos os campos obrigatórios!");
-          return;
-        }
-        const updatedUniversitario = {
-          ...user,
-          senha,
-          nome,
-          email,
-          telefone,
-          instituicao,
-          curso,
-          dataNascimento
-        };
-        if (fileInput?.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            updatedUniversitario.foto = e.target.result;
-            users[userIndex] = updatedUniversitario;
-            if (editForm) editForm.style.display = "none";
-            currentScreen = "main";
-            render();
-          };
-          reader.onerror = function() {
-            alert("Erro ao carregar a foto!");
-          };
-          reader.readAsDataURL(fileInput.files[0]);
-        } else {
-          users[userIndex] = updatedUniversitario;
-          if (editForm) editForm.style.display = "none";
-          currentScreen = "main";
-          render();
-        }
-      }
-    }
-
-    function handleAddConsulta(prefix = '') {
-      const matricula = document.getElementById(`${prefix ? prefix + '-' : ''}consulta-matricula`)?.value;
-      const data = document.getElementById(`${prefix ? prefix + '-' : ''}consulta-data`)?.value;
-      const hora = document.getElementById(`${prefix ? prefix + '-' : ''}consulta-hora`)?.value;
-      const tipo = document.getElementById(`${prefix ? prefix + '-' : ''}consulta-tipo`)?.value;
-      const descricao = document.getElementById(`${prefix ? prefix + '-' : ''}consulta-descricao`)?.value;
-      const userIndex = users.findIndex(s => s.matricula === matricula && s.tipo === "estudante");
-      if (userIndex === -1) {
-        alert("Estudante não encontrado!");
-        return;
-      }
-      if (!data || !hora || !tipo || !descricao) {
-        alert("Preencha todos os campos da consulta!");
-        return;
-      }
-      users[userIndex].consultas.push({
-        data,
-        hora,
-        tipo,
-        descricao,
-        status: null
-      });
-      currentScreen = "main";
-      render();
-    }
-
-    function deleteConsulta(index) {
-      if (!currentProfile || !Array.isArray(currentProfile.consultas)) {
-        alert("Erro ao acessar as consultas!");
-        return;
-      }
-      const consulta = currentProfile.consultas[index];
-      if (!consulta) {
-        alert("Consulta não encontrada!");
-        return;
-      }
-      if (!isConsultaPassada(consulta)) {
-        alert("Apenas consultas passadas podem ser apagadas!");
-        return;
-      }
-      if (confirm("Confirmar exclusão da consulta?")) {
-        currentProfile.consultas.splice(index, 1);
-        const userIndex = users.findIndex(u => u.matricula === currentProfile.matricula);
-        if (userIndex !== -1) {
-          users[userIndex].consultas = currentProfile.consultas;
-        }
-        render();
-      }
-    }
-
-    function loadConsultas(prefix = '') {
-      const matricula = document.getElementById(`${prefix ? 'uni-' : ''}manage-matricula`)?.value;
-      const user = users.find(u => u.matricula === matricula && u.tipo === 'estudante');
-      const consultasList = document.getElementById('consultas-list');
-      if (!consultasList) {
-        alert("Erro ao carregar a lista de consultas!");
-        return;
-      }
-      if (!user) {
-        consultasList.innerHTML = '<p class="error">Estudante não encontrado!</p>';
-        return;
-      }
-      if (!Array.isArray(user.consultas) || user.consultas.length === 0) {
-        consultasList.innerHTML = '<p>Sem consultas agendadas.</p>';
-        return;
-      }
-      consultasList.innerHTML = `
-        <h3>Consultas de ${user.nome}</h3>
-        <ul>
-          ${user.consultas.map((consulta, index) => `
-            <li class="consulta-item">
-              ${formatarDataBrasileira(consulta.data)} ${consulta.hora} - ${consulta.tipo}: ${consulta.descricao}
-              <br>
-              <label><strong>Status:</strong>
-                <select class="status-select" onchange="updateConsultaStatus('${matricula}', ${index}, this.value)">
-                  <option value="" ${!consulta.status ? 'selected' : ''}>Sem Status</option>
-                  <option value="Compareceu" ${consulta.status === 'Compareceu' ? 'selected' : ''}>Compareceu</option>
-                  <option value="Não Compareceu" ${consulta.status === 'Não Compareceu' ? 'selected' : ''}>Não Compareceu</option>
-                </select>
-              </label>
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    }
-
-    function updateConsultaStatus(matricula, index, status) {
-      const userIndex = users.findIndex(u => u.matricula === matricula && u.tipo === 'estudante');
-      if (userIndex === -1) {
-        alert("Estudante não encontrado!");
-        return;
-      }
-      if (!Array.isArray(users[userIndex].consultas) || !users[userIndex].consultas[index]) {
-        alert("Consulta não encontrada!");
-        return;
-      }
-      users[userIndex].consultas[index].status = status || null;
-      if (currentProfile && currentProfile.matricula === matricula) {
-        currentProfile.consultas = users[userIndex].consultas;
-      }
-      loadConsultas(currentUser === 'universitario' ? 'uni' : '');
-    }
-
-    function handleAddSaude(prefix = '') {
-      const matricula = document.getElementById(`${prefix ? prefix + '-' : ''}saude-matricula`)?.value;
-      const userIndex = users.findIndex(s => s.matricula === matricula && s.tipo === "estudante");
-      if (userIndex === -1) {
-        alert("Estudante não encontrado!");
-        return;
-      }
-      const observacao = document.getElementById(`${prefix ? prefix + '-' : ''}observacao`)?.value;
-      const pressao = document.getElementById(`${prefix ? prefix + '-' : ''}pressao`)?.value;
-      const glicose = document.getElementById(`${prefix ? prefix + '-' : ''}glicose`)?.value;
-      const temperatura = document.getElementById(`${prefix ? prefix + '-' : ''}temperatura`)?.value;
-      const batimentos = document.getElementById(`${prefix ? prefix + '-' : ''}batimentos`)?.value;
-      const oxigenacao = document.getElementById(`${prefix ? prefix + '-' : ''}oxigenacao`)?.value;
-
-      if (pressao && !/^\d+\/\d+$/.test(pressao)) {
-        alert("Formato de pressão inválido! Use o formato sistólica/diastólica (ex: 120/80).");
-        return;
-      }
-      if (glicose && (isNaN(glicose) || glicose <= 0)) {
-        alert("Glicose deve ser um número positivo!");
-        return;
-      }
-      if (temperatura && (isNaN(temperatura) || temperatura <= 0)) {
-        alert("Temperatura deve ser um número positivo!");
-        return;
-      }
-      if (batimentos && (!/^\d+$/.test(batimentos) || batimentos < 30 || batimentos > 200)) {
-        alert("Batimentos cardíacos devem ser um número inteiro entre 30 e 200 BPM!");
-        return;
-      }
-      if (oxigenacao && (!/^\d+$/.test(oxigenacao) || oxigenacao < 70 || oxigenacao > 100)) {
-        alert("Oxigenação deve ser um número inteiro entre 70 e 100%!");
-        return;
-      }
-
-      const timestamp = new Date().toLocaleString('pt-BR');
-      if (observacao) users[userIndex].observacoes.push({ data: timestamp, texto: observacao });
-      if (pressao) users[userIndex].pressao.push({ data: timestamp, valor: pressao });
-      if (glicose) users[userIndex].glicose.push({ data: timestamp, valor: glicose });
-      if (temperatura) users[userIndex].temperatura.push({ data: timestamp, valor: temperatura });
-      if (batimentos) users[userIndex].batimentos.push({ data: timestamp, valor: batimentos });
-      if (oxigenacao) users[userIndex].oxigenacao.push({ data: timestamp, valor: oxigenacao });
-
-      currentScreen = "main";
-      render();
-    }
-
-    let chartInstance = null;
-    function updateChart(matricula = null) {
-      let selectedMatricula = matricula;
-      if (!selectedMatricula) {
-        if (currentUser === "admin") {
-          selectedMatricula = document.getElementById("chart-matricula")?.value;
-        } else if (currentUser === "estudante") {
-          selectedMatricula = currentProfile?.matricula;
-        } else if (currentUser === "universitario") {
-          selectedMatricula = document.getElementById("uni-chart-matricula")?.value;
-        }
-      }
-      const user = users.find(s => s.matricula === selectedMatricula && s.tipo === "estudante");
-      if (!user) {
-        if (!matricula) alert("Estudante não encontrado!");
-        return null;
-      }
-
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      const ctx = matricula ? document.createElement('canvas').getContext('2d') : document.getElementById("healthChart")?.getContext("2d");
-      if (!ctx) {
-        if (!matricula) alert("Erro ao carregar o canvas do gráfico!");
-        return null;
-      }
-
-      const canvas = ctx.canvas;
-      if (matricula) {
-        canvas.width = 600;
-        canvas.height = 400;
-      }
-
-      // Ensure arrays are initialized
-      const pressao = Array.isArray(user.pressao) ? user.pressao : [];
-      const glicose = Array.isArray(user.glicose) ? user.glicose : [];
-      const temperatura = Array.isArray(user.temperatura) ? user.temperatura : [];
-      const batimentos = Array.isArray(user.batimentos) ? user.batimentos : [];
-      const oxigenacao = Array.isArray(user.oxigenacao) ? user.oxigenacao : [];
-
-      // Collect unique timestamps
-      const timestamps = new Set();
-      [pressao, glicose, temperatura, batimentos, oxigenacao].forEach(arr => {
-        arr.forEach(item => timestamps.add(item.data));
-      });
-      const labels = [...timestamps].sort((a, b) => {
-        const dateA = new Date(a.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-        const dateB = new Date(b.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-        return dateA - dateB;
-      });
-
-      const systolicData = labels.map(t => {
-        const p = pressao.find(p => p.data === t);
-        return p && p.valor ? parseInt(p.valor.split('/')[0]) || 0 : 0;
-      });
-      const diastolicData = labels.map(t => {
-        const p = pressao.find(p => p.data === t);
-        return p && p.valor ? parseInt(p.valor.split('/')[1]) || 0 : 0;
-      });
-      const glucoseData = labels.map(t => {
-        const g = glicose.find(g => g.data === t);
-        return g ? parseFloat(g.valor) || 0 : 0;
-      });
-      const temperatureData = labels.map(t => {
-        const temp = temperatura.find(temp => temp.data === t);
-        return temp ? parseFloat(temp.valor) || 0 : 0;
-      });
-      const heartRateData = labels.map(t => {
-        const b = batimentos.find(b => b.data === t);
-        return b ? parseInt(b.valor) || 0 : 0;
-      });
-      const oxygenData = labels.map(t => {
-        const o = oxigenacao.find(o => o.data === t);
-        return o ? parseInt(o.valor) || 0 : 0;
-      });
-
-      chartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Pressão Sistólica",
-              data: systolicData,
-              borderColor: "#60a5fa",
-              fill: false,
-              yAxisID: 'y'
-            },
-            {
-              label: "Pressão Diastólica",
-              data: diastolicData,
-              borderColor: "#1e40af",
-              fill: false,
-              yAxisID: 'y'
-            },
-            {
-              label: "Glicose",
-              data: glucoseData,
-              borderColor: "#f59e0b",
-              fill: false,
-              yAxisID: 'y'
-            },
-            {
-              label: "Temperatura",
-              data: temperatureData,
-              borderColor: "#ef4444",
-              fill: false,
-              yAxisID: 'y'
-            },
-            {
-              label: "Batimentos Cardíacos",
-              data: heartRateData,
-              borderColor: "#8b5cf6",
-              fill: false,
-              yAxisID: 'y1'
-            },
-            {
-              label: "Oxigenação",
-              data: oxygenData,
-              borderColor: "#ec4899",
-              fill: false,
-              yAxisID: 'y1'
+        // Função para enviar mensagem
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const usernameInput = document.getElementById('username');
+            
+            const message = messageInput.value.trim();
+            username = usernameInput.value.trim();
+            
+            if (!username) {
+                showMessage('Por favor, digite seu nome primeiro!');
+                usernameInput.focus();
+                return;
             }
-          ]
-        },
-        options: {
-          responsive: !matricula,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: false,
-              position: 'left',
-              title: {
-                display: true,
-                text: 'Pressão (mmHg), Glicose (mg/dL), Temp (°C)'
-              }
-            },
-            y1: {
-              beginAtZero: false,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'Batimentos (BPM), Oxigenação (%)'
-              },
-              grid: {
-                drawOnChartArea: false
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Data'
-              }
+            
+            if (!message) {
+                messageInput.focus();
+                return;
             }
-          }
-        }
-      });
-
-      if (matricula) {
-        const base64 = canvas.toDataURL('image/png');
-        chartInstance.destroy();
-        return base64;
-      }
-      return null;
-    }
-
-    async function generateStudentReport(prefix = '') {
-      const matricula = document.getElementById(`${prefix ? prefix + '-' : ''}report-matricula`)?.value;
-      if (!matricula) {
-        alert("Por favor, insira a matrícula do estudante!");
-        return;
-      }
-      const student = users.find(u => u.matricula === matricula && u.tipo === "estudante");
-      if (!student) {
-        alert("Estudante não encontrado!");
-        return;
-      }
-
-      let chartImage = null;
-      const hasHealthData = Array.isArray(student.pressao) && student.pressao.length > 0 ||
-                           Array.isArray(student.glicose) && student.glicose.length > 0 ||
-                           Array.isArray(student.temperatura) && student.temperatura.length > 0 ||
-                           Array.isArray(student.batimentos) && student.batimentos.length > 0 ||
-                           Array.isArray(student.oxigenacao) && student.oxigenacao.length > 0;
-
-      if (hasHealthData) {
-        try {
-          chartImage = await updateChart(matricula);
-          if (!chartImage) {
-            console.error("Falha ao gerar o gráfico para o relatório.");
-          }
-        } catch (error) {
-          console.error("Erro ao gerar gráfico:", error);
-          chartImage = null; // Prosseguir sem gráfico se houver erro
-        }
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      // Título
-      doc.setFontSize(20);
-      doc.setTextColor(4, 120, 87);
-      doc.text("Relatório de Estudante - TchêCuidaMeu", 105, 20, { align: "center" });
-
-      // Data e Horário
-      doc.setFontSize(12);
-      doc.setTextColor(14, 42, 68);
-      const now = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-      doc.text(`Gerado em: ${now}`, 105, 30, { align: "center" });
-
-      // Estudante
-      doc.setFontSize(16);
-      doc.setTextColor(4, 120, 87);
-      doc.text(`Estudante: ${student.nome}`, 20, 50);
-
-      // Informações Gerais
-      doc.setFontSize(14);
-      doc.text("Informações Gerais", 20, 65);
-      doc.autoTable({
-        startY: 70,
-        head: [['Campo', 'Informação']],
-        body: [
-          ['Matrícula', student.matricula],
-          ['Nome', student.nome],
-          ['Responsável', student.responsavel],
-          ['Telefone', student.telefone],
-          ['Endereço', student.endereco],
-          ['Escola', student.escola || 'Não informado'],
-          ['Tipo Sanguíneo', student.tipoSanguineo],
-          ['Observação', student.observacao || 'Nenhuma']
-        ],
-        theme: 'striped',
-        headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-        bodyStyles: { textColor: [31, 42, 68] },
-        margin: { left: 20, right: 20 }
-      });
-
-      let yPos = doc.lastAutoTable.finalY + 15;
-
-      // Consultas Agendadas
-      if (Array.isArray(student.consultas) && student.consultas.length > 0) {
-        doc.setFontSize(14);
-        doc.setTextColor(4, 120, 87);
-        doc.text("Consultas Agendadas", 20, yPos);
-        const sortedConsultas = [...student.consultas].sort((a, b) => {
-          const dateA = new Date(a.data + 'T' + a.hora);
-          const dateB = new Date(b.data + 'T' + b.hora);
-          return dateA - dateB;
-        });
-        doc.autoTable({
-          startY: yPos + 5,
-          head: [['Data', 'Hora', 'Médico/Especialidade', 'Descrição', 'Status']],
-          body: sortedConsultas.map(c => [
-            formatarDataBrasileira(c.data),
-            c.hora,
-            c.tipo,
-            c.descricao,
-            c.status || 'Sem Status'
-          ]),
-          theme: 'striped',
-          headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-          bodyStyles: { textColor: [31, 42, 68] },
-          margin: { left: 20, right: 20 }
-        });
-        yPos = doc.lastAutoTable.finalY + 15;
-      }
-
-      // Observações Diárias
-      if (Array.isArray(student.observacoes) && student.observacoes.length > 0) {
-        doc.setFontSize(14);
-        doc.setTextColor(4, 120, 87);
-        doc.text("Observações", 20, yPos);
-        const sortedObservacoes = [...student.observacoes].sort((a, b) => {
-          const dateA = new Date(a.data.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-          const dateB = new Date(b.data.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-          return dateA - dateB;
-        });
-        doc.autoTable({
-          startY: yPos + 5,
-          head: [['Data', 'Observação']],
-          body: sortedObservacoes.map(o => [o.data, o.texto]),
-          theme: 'striped',
-          headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-          bodyStyles: { textColor: [31, 42, 68] },
-          margin: { left: 20, right: 20 }
-        });
-        yPos = doc.lastAutoTable.finalY + 15;
-      }
-
-      // Acompanhamento de Saúde
-      if (hasHealthData) {
-        doc.setFontSize(14);
-        doc.setTextColor(4, 120, 87);
-        doc.text("Acompanhamento de Saúde", 20, yPos);
-
-        // Tabela de Dados de Saúde
-        const healthDataRows = [];
-        const timestamps = new Set();
-        const healthArrays = [student.pressao, student.glicose, student.temperatura, student.batimentos, student.oxigenacao];
-        healthArrays.forEach(arr => {
-          if (Array.isArray(arr)) {
-            arr.forEach(item => timestamps.add(item.data));
-          }
-        });
-        const sortedTimestamps = [...timestamps].sort((a, b) => {
-          const dateA = new Date(a.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-          const dateB = new Date(b.replace(/(\d+)\/(\d+)\/(\d+), (\d+:\d+)/, '$3-$2-$1T$4'));
-          return dateA - dateB;
-        });
-        sortedTimestamps.forEach(timestamp => {
-          const row = [
-            timestamp,
-            student.pressao.find(p => p.data === timestamp)?.valor || '-',
-            student.glicose.find(g => g.data === timestamp)?.valor || '-',
-            student.temperatura.find(t => t.data === timestamp)?.valor || '-',
-            student.batimentos.find(b => b.data === timestamp)?.valor || '-',
-            student.oxigenacao.find(o => o.data === timestamp)?.valor || '-'
-          ];
-          healthDataRows.push(row);
-        });
-        if (healthDataRows.length > 0) {
-          doc.autoTable({
-            startY: yPos + 5,
-            head: [['Data', 'Pressão (mmHg)', 'Glicose (mg/dL)', 'Temperatura (°C)', 'Batimentos (BPM)', 'Oxigenação (%)']],
-            body: healthDataRows,
-            theme: 'striped',
-            headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-            bodyStyles: { textColor: [31, 55, 68] },
-            margin: { left: 20, right: 20 }
-          });
-          yPos = doc.lastAutoTable.finalY + 15;
+            
+            // Adicionar mensagem ao array em memória
+            const newMessage = {
+                id: Date.now(),
+                username: username,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            
+            messages.push(newMessage);
+            
+            // Limitar a 100 mensagens para não sobrecarregar a memória
+            if (messages.length > 100) {
+                messages = messages.slice(-100);
+            }
+            
+            // Adicionar usuário aos online
+            addUserOnline(username);
+            
+            // Limpar input e atualizar interface
+            messageInput.value = '';
+            displayMessages();
+            
+            showMessage('Mensagem enviada!', 'success');
         }
 
-        // Gráfico de Saúde
-        if (chartImage) {
-          try {
-            const imgWidth = 170; // mm
-            const imgHeight = imgWidth * (400 / 600); // Proporção
-            doc.addImage(chartImage, 'PNG', 20, yPos, imgWidth, imgHeight);
-            doc.setFontSize(10);
-            doc.text(`Gráfico de saúde para ${student.nome}`, 105, yPos + imgHeight + 10, { align: "center" });
-          } catch (error) {
-            console.error("Erro ao adicionar gráfico ao PDF:", error);
-          }
+        // Função para adicionar usuário online
+        function addUserOnline(user) {
+            if (user && user.trim()) {
+                onlineUsers.add(user.trim());
+                
+                // Limpar timeout anterior se existir
+                if (userActivityTimeout.has(user)) {
+                    clearTimeout(userActivityTimeout.get(user));
+                }
+                
+                // Definir novo timeout para remover usuário após 30 segundos de inatividade
+                const timeoutId = setTimeout(() => {
+                    onlineUsers.delete(user);
+                    updateOnlineUsers();
+                }, 30000);
+                
+                userActivityTimeout.set(user, timeoutId);
+                updateOnlineUsers();
+            }
         }
-      }
 
-      // Salvar PDF
-      try {
-        doc.save(`relatorio_estudante_${matricula}.pdf`);
-      } catch (error) {
-        console.error("Erro ao salvar PDF:", error);
-        alert("Erro ao gerar o PDF. Verifique o console para detalhes.");
-      }
-    }
+        // Função para exibir mensagens
+        function displayMessages() {
+            const messagesContainer = document.getElementById('messages');
+            const wasAtBottom = messagesContainer.scrollTop >= (messagesContainer.scrollHeight - messagesContainer.clientHeight - 50);
+            
+            // Limpar container mantendo apenas a mensagem de boas-vindas
+            const welcomeMessage = messagesContainer.firstElementChild;
+            messagesContainer.innerHTML = '';
+            messagesContainer.appendChild(welcomeMessage);
+            
+            // Adicionar todas as mensagens
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                
+                const date = new Date(msg.timestamp);
+                const timeString = date.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span class="username">${escapeHtml(msg.username)}</span>
+                        <span class="timestamp">${timeString}</span>
+                    </div>
+                    <div class="message-content">
+                        ${escapeHtml(msg.message)}
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            // Rolar para baixo se estava no final
+            if (wasAtBottom || messages.length !== lastMessageCount) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            lastMessageCount = messages.length;
+        }
 
-    try {
-      render();
-    } catch (error) {
-      console.error("Erro ao inicializar a aplicação:", error);
-    }
-  </script>
+        // Função para atualizar lista de usuários online
+        function updateOnlineUsers() {
+            const userList = document.getElementById('user-list');
+            const userCount = document.getElementById('user-count');
+            
+            userList.innerHTML = '';
+            userCount.textContent = onlineUsers.size;
+            
+            if (onlineUsers.size === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'user-item';
+                emptyDiv.textContent = 'Nenhum usuário online';
+                emptyDiv.style.opacity = '0.6';
+                userList.appendChild(emptyDiv);
+            } else {
+                // Converter Set para Array e ordenar
+                const sortedUsers = Array.from(onlineUsers).sort();
+                
+                sortedUsers.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'user-item';
+                    userDiv.innerHTML = `<span class="status-indicator" style="width: 6px; height: 6px; margin-right: 8px;"></span>${escapeHtml(user)}`;
+                    userList.appendChild(userDiv);
+                });
+            }
+        }
+
+        // Função para atualizar atividade do usuário
+        function updateUserActivity() {
+            const usernameInput = document.getElementById('username');
+            const currentUsername = usernameInput.value.trim();
+            
+            if (currentUsername && currentUsername !== username) {
+                username = currentUsername;
+                addUserOnline(username);
+            } else if (username) {
+                addUserOnline(username);
+            }
+        }
+
+        // Função para escapar HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Atualizar atividade quando o usuário digita o nome
+        document.getElementById('username').addEventListener('input', function(e) {
+            // Debounce para evitar muitas chamadas
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                updateUserActivity();
+            }, 1000);
+        });
+
+        // Atualizar atividade periodicamente
+        setInterval(updateUserActivity, 15000);
+
+        // Limpeza quando a página é fechada
+        window.addEventListener('beforeunload', function() {
+            if (username) {
+                onlineUsers.delete(username);
+            }
+        });
+
+        // Inicialização
+        updateOnlineUsers();
+    </script>
 </body>
 </html>
