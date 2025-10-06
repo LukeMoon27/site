@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EfraChat - Chat Online</title>
+    <title>The Solar Winds - Your Journey Through the Solar Storm</title>
     <style>
         * {
             margin: 0;
@@ -13,204 +13,69 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2d1b69 0%, #11052c 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .chat-container {
-            width: 90%;
-            max-width: 1000px;
-            height: 600px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            display: flex;
+            text-align: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(26, 26, 26, 0.8)), url('https://science.nasa.gov/wp-content/uploads/2023/09/sun-coronal-mass-ejection.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
             overflow: hidden;
-            backdrop-filter: blur(10px);
         }
 
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(135deg, #4c1d95, #1e1b4b);
-            color: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
         }
 
-        .logo h1 {
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(45deg, #a855f7, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
         }
 
-        .logo p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-top: 5px;
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ff8c00;
+            text-shadow: 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 140, 0, 0.5);
+            animation: fadeInUp 1s ease-out;
+            font-weight: 700;
+            letter-spacing: 2px;
         }
 
-        .username-section {
-            margin-bottom: 30px;
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1.5s ease-out;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+            font-weight: 300;
         }
 
-        .username-section label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .username-section input {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 14px;
-        }
-
-        .username-section input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .online-users {
-            flex: 1;
-        }
-
-        .online-users h3 {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .user-list {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .user-item {
-            padding: 8px;
-            margin-bottom: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .main-chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            background: linear-gradient(90deg, #2d1b69, #4c1d95);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .chat-header h2 {
-            font-size: 20px;
-        }
-
-        .messages-container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .username {
-            font-weight: bold;
-            color: #4c1d95;
-        }
-
-        .timestamp {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .message-content {
-            background: white;
-            padding: 12px 15px;
-            border-radius: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid #4c1d95;
-        }
-
-        .message-form {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .message-input:focus {
-            border-color: #4c1d95;
-        }
-
-        .send-btn {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #4c1d95, #1e1b4b);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .send-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, #5b21b6, #312e81);
-        }
-
-        .send-btn:active {
-            transform: translateY(0);
-        }
-
-        @keyframes slideIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -218,316 +83,990 @@
             }
         }
 
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            background: #4ade80;
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .scroll-indicator::after {
+            content: '▼';
+            color: #ff8c00;
+            font-size: 2rem;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            border-bottom: 2px solid #ff8c00;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        nav a:hover {
+            color: #ff8c00;
+            background: rgba(255, 140, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 6rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #ff8c00;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff8c00, transparent);
+        }
+
+        .story-box {
+            background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border-left: 5px solid #ff8c00;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .story-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 140, 0, 0.3);
+        }
+
+        .story-box h3 {
+            color: #ff8c00;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #ff8c00;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card h3 {
+            color: #ff8c00;
+            margin-bottom: 1rem;
+        }
+
+        .alert-box {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 2rem 0;
+            box-shadow: 0 5px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #ff8c00, transparent);
+        }
+
+        .timeline-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -3.5rem;
+            top: 0;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
+            background: #ff8c00;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
+        }
+
+        .faq {
+            background: #2d2d2d;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq:hover {
+            background: #3a3a3a;
+            border-left: 5px solid #ff8c00;
+            padding-left: 1.75rem;
+        }
+
+        .faq h4 {
+            color: #ff8c00;
+            margin-bottom: 0.5rem;
+        }
+
+        .resources-link {
             display: inline-block;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: #1a1a1a;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .resources-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.5);
         }
 
-        .error-message {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
+        .impact-meter {
+            background: #2d2d2d;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .impact-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b00, #ff8c00);
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        footer {
+            background: #1a1a1a;
             text-align: center;
+            padding: 3rem 2rem;
+            border-top: 2px solid #ff8c00;
         }
 
-        .success-message {
-            background: #d1fae5;
-            color: #059669;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            text-align: center;
+        footer a {
+            color: #ff8c00;
+            text-decoration: none;
+        }
+
+        .interactive-sun {
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            background: radial-gradient(circle, #ff8c00 0%, #ff6b00 50%, transparent 70%);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+            position: relative;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .flare {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.6) 0%, transparent 60%);
+            animation: flare 3s ease-in-out infinite;
+        }
+
+        @keyframes flare {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 0.8; }
         }
 
         @media (max-width: 768px) {
-            .chat-container {
-                width: 95%;
-                height: 90vh;
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: 200px;
-            }
-            
-            .online-users {
-                display: none;
-            }
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.2rem; }
+            .section-title { font-size: 2rem; }
+            nav ul { flex-direction: column; gap: 0.5rem; }
+        }
+
+        .quiz-container {
+            background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid #ff8c00;
+            margin-top: 2rem;
+        }
+
+        .quiz-question {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .quiz-question h4 {
+            color: #ff8c00;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .quiz-option {
+            background: #2d2d2d;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: #ff8c00;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            border-color: #ff8c00;
+            background: rgba(255, 140, 0, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .quiz-option.incorrect {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        .quiz-btn {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: #1a1a1a;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.5);
+        }
+
+        .quiz-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-result {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .quiz-explanation {
+            background: rgba(255, 140, 0, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            border-left: 3px solid #ff8c00;
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="sidebar">
-            <div class="logo">
-                <h1>EfraChat</h1>
-                <p>Chat em tempo real</p>
-            </div>
-            
-            <div class="username-section">
-                <label for="username">Seu nome:</label>
-                <input type="text" id="username" placeholder="Digite seu nome..." maxlength="20">
-            </div>
-            
-            <div class="online-users">
-                <h3><span class="status-indicator"></span>Online (<span id="user-count">0</span>)</h3>
-                <div class="user-list" id="user-list">
-                    <div class="user-item">Nenhum usuário online</div>
-                </div>
-            </div>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>The Solar Winds</h1>
+            <p>Journey Through the Solar Storm - Your Complete Guide to Understanding Space Weather</p>
         </div>
-        
-        <div class="main-chat">
-            <div class="chat-header">
-                <h2>💬 Conversa Principal</h2>
-            </div>
-            
-            <div class="messages-container" id="messages">
-                <div class="message">
-                    <div class="message-header">
-                        <span class="username">Sistema</span>
-                        <span class="timestamp" id="welcome-time"></span>
-                    </div>
-                    <div class="message-content">
-                        Bem-vindo ao EfraChat! Digite seu nome e comece a conversar. ⚠️ <strong>Atenção:</strong> Este chat funciona apenas em memória - todas as mensagens serão perdidas ao fechar a página.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="message-form">
-                <input type="text" class="message-input" id="message-input" 
-                       placeholder="Digite sua mensagem..." maxlength="500">
-                <button class="send-btn" onclick="sendMessage()">Enviar</button>
-            </div>
-        </div>
+        <div class="scroll-indicator"></div>
     </div>
 
+    <nav>
+        <ul>
+            <li><a href="#story">The Story</a></li>
+            <li><a href="#what">What Is It?</a></li>
+            <li><a href="#impacts">Impacts</a></li>
+            <li><a href="#monitoring">Monitoring</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#quiz">Quiz</a></li>
+            <li><a href="#resources">Resources</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section id="story" class="section">
+            <h2 class="section-title">The Story Begins 93 Million Miles Away</h2>
+            
+            <div class="interactive-sun">
+                <div class="flare"></div>
+            </div>
+
+            <div class="story-box">
+                <h3>🌟 Chapter 1: The Awakening Sun</h3>
+                <p>Deep in the heart of our solar system, a massive fusion reactor burns at 27 million degrees Fahrenheit. This is our Sun, and it's far from the peaceful ball of light it appears to be. Beneath its glowing surface, a storm is always brewing...</p>
+                <p>Every 11 years, the Sun awakens from its slumber, becoming more active, more volatile, more dangerous. Magnetic field lines twist and tangle like cosmic spaghetti, building up tremendous energy until—SNAP!—they release it all at once in spectacular displays called solar flares and coronal mass ejections.</p>
+            </div>
+
+            <div class="story-box">
+                <h3>⚡ Chapter 2: The Journey Begins</h3>
+                <p>When the Sun erupts, billions of tons of magnetized plasma rush into space at speeds up to 3,000 kilometers per second. This solar storm begins its journey across the void, carrying with it enough energy to power entire civilizations—or cripple them.</p>
+                <p>For 1 to 3 days, this invisible threat races toward Earth. You can't see it coming. You can't feel it approaching. But satellites are watching, scientists are monitoring, and time is running out...</p>
+            </div>
+
+            <div class="alert-box">
+                ⚠️ Real Impact: In 1859, the Carrington Event—the most powerful solar storm in recorded history—caused telegraph systems worldwide to fail, with some operators reporting electric shocks and papers catching fire. If it happened today, it could cause $2 trillion in damage.
+            </div>
+
+            <div class="story-box">
+                <h3>🛡️ Chapter 3: Earth's Shield</h3>
+                <p>Fortunately, Earth isn't defenseless. Our planet's magnetic field acts as an invisible shield, deflecting most of the solar onslaught. But when a powerful storm strikes, even this shield can buckle and bend, allowing charged particles to stream into our atmosphere.</p>
+                <p>The result? Beautiful auroras dancing across polar skies—and potential chaos for our technology-dependent civilization.</p>
+            </div>
+        </section>
+
+        <section id="what" class="section">
+            <h2 class="section-title">What Is Space Weather?</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <span class="card-icon">☀️</span>
+                    <h3>Solar Flares</h3>
+                    <p>Intense bursts of radiation that reach Earth in just 8 minutes. They're classified from A (weakest) to X (strongest), with X-class flares capable of disrupting radio communications globally.</p>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">🌊</span>
+                    <h3>Coronal Mass Ejections</h3>
+                    <p>Massive clouds of magnetized plasma ejected from the Sun's corona. When Earth-directed, they can trigger geomagnetic storms that affect satellites, power grids, and navigation systems.</p>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">💨</span>
+                    <h3>Solar Wind</h3>
+                    <p>A constant stream of charged particles flowing from the Sun at 250-750 km/s. High-speed streams from coronal holes can intensify geomagnetic activity.</p>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">⚛️</span>
+                    <h3>Solar Energetic Particles</h3>
+                    <p>High-energy particles accelerated by solar flares and CME shocks. They pose radiation hazards to astronauts and can damage spacecraft electronics.</p>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">🌍</span>
+                    <h3>Geomagnetic Storms</h3>
+                    <p>Disturbances in Earth's magnetosphere caused by solar wind interactions. Rated G1 (minor) to G5 (extreme) based on their intensity and potential impacts.</p>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">📡</span>
+                    <h3>Ionospheric Disturbances</h3>
+                    <p>Changes in the ionosphere that affect radio wave propagation. Can disrupt GPS, aviation communications, and radio broadcasts.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impacts" class="section">
+            <h2 class="section-title">How Space Weather Impacts Your World</h2>
+
+            <div class="story-box">
+                <h3>Power Grids: The Achilles Heel</h3>
+                <p>Geomagnetic storms induce electric currents in long power lines and transformers. In March 1989, a severe storm caused a 9-hour blackout across Quebec, Canada, affecting 6 million people.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 85%">High Risk</div>
+                </div>
+            </div>
+
+            <div class="story-box">
+                <h3>Satellite Operations: Dancing with Danger</h3>
+                <p>Satellites in orbit face multiple threats: increased atmospheric drag during storms, damaging radiation, and potential electronics failures. Modern civilization relies on thousands of satellites for communication, weather, GPS, and more.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 90%">Critical Risk</div>
+                </div>
+            </div>
+
+            <div class="story-box">
+                <h3>Aviation: Turbulence from Above</h3>
+                <p>Polar flight routes experience increased radiation exposure during solar storms. Airlines must sometimes reroute flights, costing time and fuel. Radio communications can be disrupted, especially at high latitudes.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 70%">Moderate Risk</div>
+                </div>
+            </div>
+
+            <div class="story-box">
+                <h3>GPS & Navigation: Lost in Space</h3>
+                <p>Ionospheric disturbances can cause GPS errors of several meters to hundreds of meters. Critical for aviation, shipping, agriculture, emergency services, and countless smartphone apps.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 75%">Significant Risk</div>
+                </div>
+            </div>
+
+            <div class="story-box">
+                <h3>Telecommunications: The Silent Storm</h3>
+                <p>High-frequency radio communications can be completely blacked out during intense solar flares. Satellite communications may experience degradation or interruption.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 65%">Moderate Risk</div>
+                </div>
+            </div>
+
+            <div class="story-box">
+                <h3>Human Space Exploration: Radiation Hazard</h3>
+                <p>Astronauts on the International Space Station or future lunar/Mars missions face elevated radiation risks during solar storms. Protection and warning systems are essential for crew safety.</p>
+                <div class="impact-meter">
+                    <div class="impact-fill" style="width: 95%">Extreme Risk</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2 class="section-title">The Guardians: How We Monitor Space Weather</h2>
+
+            <div class="alert-box">
+                📊 Live Data: Below you can see real-time space weather monitoring from NOAA's Space Weather Prediction Center. These instruments watch the Sun 24/7 to keep us safe.
+            </div>
+
+            <div class="story-box">
+                <h3>🌐 Real-Time Space Weather Data</h3>
+                <p style="margin-bottom: 1.5rem;">NOAA's Space Weather Prediction Center continuously monitors solar activity, geomagnetic conditions, and space weather impacts. Here are live visualizations from their monitoring systems:</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">Solar X-Ray Flux</h4>
+                        <img src="https://services.swpc.noaa.gov/images/goes-xray-flux-6-hour.gif" alt="Solar X-Ray Flux" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=X-Ray+Flux+Monitor';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">Measures solar flare intensity. Red line shows X-ray emissions that reach Earth in 8 minutes.</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">Geomagnetic Field</h4>
+                        <img src="https://services.swpc.noaa.gov/images/planetary-k-index.gif" alt="Planetary K-Index" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=Kp+Index+Monitor';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">Shows Earth's magnetic field disturbance. Higher values mean stronger geomagnetic storms.</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">Solar Wind Speed</h4>
+                        <img src="https://services.swpc.noaa.gov/images/solar-wind-speed.gif" alt="Solar Wind Speed" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=Solar+Wind+Monitor';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">Tracks the speed of particles flowing from the Sun. Spikes indicate high-speed streams or CMEs.</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">The Sun (Latest View)</h4>
+                        <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg" alt="SDO Solar Image" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=Solar+Imagery';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">NASA's Solar Dynamics Observatory image showing active regions, flares, and coronal holes.</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">Aurora Forecast</h4>
+                        <img src="https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg" alt="Aurora Forecast" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=Aurora+Forecast';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">Predicts where auroras might be visible. Green/yellow areas have higher aurora probability.</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 10px; border: 2px solid #ff8c00;">
+                        <h4 style="color: #ff8c00; text-align: center; margin-bottom: 1rem;">Solar Proton Events</h4>
+                        <img src="https://services.swpc.noaa.gov/images/goes-proton-flux.gif" alt="Proton Flux" style="width: 100%; border-radius: 5px; background: #000; min-height: 200px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/1a1a1a/ff8c00?text=Proton+Flux+Monitor';">
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #ccc;">Monitors energetic particles that can damage satellites and pose radiation risks.</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="https://www.swpc.noaa.gov/" target="_blank" class="resources-link">View Full NOAA Dashboard →</a>
+                </div>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="story-box">
+                        <h3>🛰️ Space-Based Sentinels</h3>
+                        <p><strong>GOES Satellites:</strong> NOAA's Geostationary Operational Environmental Satellites monitor the Sun 24/7, detecting X-rays and solar energetic particles.</p>
+                        <p><strong>SOHO & SDO:</strong> NASA missions studying the Sun's interior, atmosphere, and magnetic field with unprecedented detail.</p>
+                        <p><strong>Parker Solar Probe:</strong> Diving closer to the Sun than any spacecraft before, gathering data from within the solar corona.</p>
+                        <p><strong>DSCOVR:</strong> Positioned at L1 point (1 million miles from Earth), providing early warning of incoming solar storms—typically 15-60 minutes before impact.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="story-box">
+                        <h3>🌐 Ground-Based Networks</h3>
+                        <p><strong>Magnetometers:</strong> Stations worldwide measure Earth's magnetic field variations, detecting geomagnetic storm intensity in real-time.</p>
+                        <p><strong>Ionospheric Monitors:</strong> Track changes in the ionosphere that affect radio communications and GPS accuracy.</p>
+                        <p><strong>Neutron Monitors:</strong> Detect solar energetic particles reaching Earth's surface, indicating radiation storm severity.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="story-box">
+                        <h3>🔬 Forecasting Centers</h3>
+                        <p><strong>NOAA Space Weather Prediction Center:</strong> The U.S. government's official source for space weather forecasts, watches, warnings, and alerts.</p>
+                        <p><strong>NASA Space Weather Centers of Excellence:</strong> Research institutions advancing space weather understanding and prediction capabilities.</p>
+                        <p><strong>International Collaboration:</strong> Global network sharing data and coordinating responses to space weather events.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                🎯 Current Capabilities: We can forecast solar flares minutes before they occur, predict CME arrival times within several hours, and provide geomagnetic storm warnings 1-3 days in advance. But there's still much to learn...
+            </div>
+        </section>
+
+        <section id="faq" class="section">
+            <h2 class="section-title">Your Questions Answered</h2>
+
+            <div class="faq">
+                <h4>Q: Can space weather harm humans on Earth?</h4>
+                <p>A: Earth's atmosphere and magnetic field provide excellent protection. Ground-level radiation from solar storms is negligible. However, astronauts in space, airline crew on polar routes, and high-altitude workers may receive elevated radiation doses during major events.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: How often do dangerous solar storms occur?</h4>
+                <p>A: Severe geomagnetic storms (G4-G5) occur approximately 10-20 times per solar cycle (11 years). Extreme events like the Carrington Event are estimated once every 100-200 years. The Sun is currently approaching solar maximum.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: Would a massive solar storm destroy the internet?</h4>
+                <p>A: Undersea fiber optic cables are generally safe, but the electronics at repeater stations and connection points could be vulnerable. Satellite internet systems face greater risk. A truly catastrophic event could cause widespread, prolonged outages.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: Can we predict when the next big storm will hit?</h4>
+                <p>A: We can detect active regions on the Sun and predict increased probability of flares. Once a CME is observed, we can estimate Earth arrival within hours. However, predicting exactly when and where a massive flare will occur remains challenging.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: What should I do to prepare for a solar storm?</h4>
+                <p>A: For most people, no special preparation is needed. Critical infrastructure operators should have contingency plans. Have emergency supplies (food, water, batteries, radio) as you would for any power outage. Stay informed through NOAA alerts.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: Are auroras dangerous?</h4>
+                <p>A: Absolutely not! Auroras are safe to observe and occur at altitudes of 60-300 miles. They're a beautiful visual reminder that Earth's magnetic shield is protecting us from solar particles.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: How does space weather affect climate?</h4>
+                <p>A: Solar output varies slightly over the 11-year cycle, but this has minimal impact on Earth's climate compared to greenhouse gases. Space weather primarily affects technology rather than weather/climate on human timescales.</p>
+            </div>
+
+            <div class="faq">
+                <h4>Q: Could we shield our technology better?</h4>
+                <p>A: Yes! Engineers are developing hardened electronics, better shielding for satellites, and resilient power grid designs. The challenge is balancing protection with cost—retrofitting global infrastructure is enormously expensive.</p>
+            </div>
+        </section>
+
+        <section id="resources" class="section">
+            <h2 class="section-title">Dive Deeper: Essential Resources</h2>
+
+            <div class="story-box">
+                <h3>🚨 Real-Time Monitoring</h3>
+                <p>Stay updated with current space weather conditions:</p>
+                <a href="https://www.swpc.noaa.gov/" target="_blank" class="resources-link">NOAA Space Weather Prediction Center</a>
+                <a href="https://www.spaceweather.gov/" target="_blank" class="resources-link">Spaceweather.gov - Alerts & Forecasts</a>
+            </div>
+
+            <div class="story-box">
+                <h3>📚 Learn More</h3>
+                <p>Explore comprehensive educational materials:</p>
+                <a href="https://science.nasa.gov/heliophysics/focus-areas/space-weather/" target="_blank" class="resources-link">NASA Space Weather Overview</a>
+                <a href="https://science.nasa.gov/sun/solar-storms-and-flares/" target="_blank" class="resources-link">NASA: Solar Storms & Flares</a>
+                <a href="https://science.nasa.gov/space-weather-centers-of-excellence/" target="_blank" class="resources-link">NASA Research Centers</a>
+            </div>
+
+            <div class="story-box">
+                <h3>🎥 Visualizations</h3>
+                <p>See space weather in action:</p>
+                <a href="https://svs.gsfc.nasa.gov/" target="_blank" class="resources-link">NASA Scientific Visualization Studio</a>
+                <a href="https://www.goes-r.gov/multimedia/space-weather.html" target="_blank" class="resources-link">GOES-R Space Weather Imagery</a>
+            </div>
+
+            <div class="story-box">
+                <h3>📊 Data & Research</h3>
+                <p>Access scientific data and reports:</p>
+                <a href="https://www.weather.gov/media/nws/Results-of-the-First-National-Survey-of-User-Needs-for-Space-Weather-2024.pdf" target="_blank" class="resources-link">National Space Weather Survey 2024</a>
+            </div>
+
+            <div class="alert-box">
+                💡 Pro Tip: Sign up for NOAA's Space Weather alerts to receive notifications about solar storms, geomagnetic activity, and potential impacts. Stay informed, stay prepared!
+            </div>
+        </section>
+
+        <section id="quiz" class="section">
+            <h2 class="section-title">Test Your Knowledge</h2>
+            
+            <div class="quiz-container">
+                <div id="quizContent">
+                    <div class="quiz-question" data-question="0">
+                        <h4>1. How long does it take for a Coronal Mass Ejection (CME) to reach Earth?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="wrong">A) 8 minutes</div>
+                            <div class="quiz-option" data-answer="correct">B) 1 to 3 days</div>
+                            <div class="quiz-option" data-answer="wrong">C) 1 week</div>
+                            <div class="quiz-option" data-answer="wrong">D) Instantly</div>
+                        </div>
+                        <div class="quiz-explanation" style="display: none;">
+                            Solar flares reach Earth in 8 minutes (speed of light), but CMEs take 1-3 days to travel the 93 million miles from the Sun to Earth.
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" data-question="1">
+                        <h4>2. What was the most powerful solar storm in recorded history?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="correct">A) The Carrington Event (1859)</div>
+                            <div class="quiz-option" data-answer="wrong">B) The Quebec Blackout (1989)</div>
+                            <div class="quiz-option" data-answer="wrong">C) The Halloween Storms (2003)</div>
+                            <div class="quiz-option" data-answer="wrong">D) The Bastille Day Event (2000)</div>
+                        </div>
+                        <div class="quiz-explanation" style="display: none;">
+                            The Carrington Event of 1859 was so powerful that auroras were seen as far south as the Caribbean, and telegraph systems worldwide failed.
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" data-question="2">
+                        <h4>3. What protects Earth from most solar radiation?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="wrong">A) The ozone layer</div>
+                            <div class="quiz-option" data-answer="correct">B) Earth's magnetic field</div>
+                            <div class="quiz-option" data-answer="wrong">C) The atmosphere alone</div>
+                            <div class="quiz-option" data-answer="wrong">D) The Moon</div>
+                        </div>
+                        <div class="quiz-explanation" style="display: none;">
+                            Earth's magnetic field (magnetosphere) acts as an invisible shield, deflecting most charged particles from the solar wind and storms.
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" data-question="3">
+                        <h4>4. How often does the Sun's activity cycle peak?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="wrong">A) Every year</div>
+                            <div class="quiz-option" data-answer="wrong">B) Every 5 years</div>
+                            <div class="quiz-option" data-answer="correct">C) Every 11 years</div>
+                            <div class="quiz-option" data-answer="wrong">D) Every 25 years</div>
+                        </div>
+                        <div class="quiz-explanation" style="display: none;">
+                            The solar cycle lasts approximately 11 years, during which the Sun goes from quiet (solar minimum) to active (solar maximum) and back.
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" data-question="4">
+                        <h4>5. Which technology is MOST vulnerable to space weather?</h4>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-answer="wrong">A) Smartphones</div>
+                            <div class="quiz-option" data-answer="correct">B) Power grids and satellites</div>
+                            <div class="quiz-option" data-answer="wrong">C) Cars</div>
+                            <div class="quiz-option" data-answer="wrong">D) Home appliances</div>
+                        </div>
+                        <div class="quiz-explanation" style="display: none;">
+                            Power grids can experience induced currents from geomagnetic storms, and satellites face radiation damage, increased drag, and electronics failures.
+                        </div>
+                    </div>
+                </div>
+
+                <button class="quiz-btn" id="submitQuiz">Submit Answers</button>
+                <button class="quiz-btn" id="resetQuiz" style="display: none; margin-left: 1rem;">Try Again</button>
+                <div id="quizResult"></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Our Mission: Making Space Weather Accessible</h2>
+            
+            <div class="story-box">
+                <h3>🎯 The Challenge We Face</h3>
+                <p>Space weather affects every person on Earth, yet most people don't understand it. When a massive solar storm strikes, it's not just scientists and engineers who need to know—it's airline pilots adjusting flight paths, power grid operators protecting infrastructure, GPS-dependent farmers planning their harvests, and everyday people wondering if their technology will work tomorrow.</p>
+                <p>The problem isn't a lack of data—NASA, NOAA, and research institutions worldwide generate incredible amounts of space weather information every day. The challenge is making this critical knowledge understandable, actionable, and accessible to everyone, regardless of their scientific background.</p>
+            </div>
+
+            <div class="story-box">
+                <h3>💡 Why This Matters</h3>
+                <p>We live in an increasingly interconnected world where a single severe space weather event could disrupt global communications, navigation systems, power grids, and financial networks. The 1859 Carrington Event occurred when our technology was limited to telegraph systems. If a similar event happened today, experts estimate it could cause over $2 trillion in damage and take years to recover from.</p>
+                <p>But here's the crucial point: <strong>knowledge is our best defense</strong>. When people understand space weather, they can prepare. Industries can implement protective measures. Governments can develop resilience strategies. Communities can respond effectively instead of panicking.</p>
+            </div>
+
+            <div class="story-box">
+                <h3>🌍 Our Purpose</h3>
+                <p><strong>The Solar Winds</strong> exists to bridge the gap between complex scientific data and public understanding. Our mission is threefold:</p>
+                <p><strong>1. Universal Accessibility:</strong> We believe space weather information should be available to everyone—from curious students to industry professionals, from policymakers to concerned citizens. No gatekeeping, no jargon walls, no barriers to knowledge.</p>
+                <p><strong>2. Clear Communication:</strong> We translate complex heliophysics into compelling stories and practical information. Space weather isn't just data points and graphs—it's a dynamic, fascinating phenomenon that affects our daily lives. We make it understandable without dumbing it down.</p>
+                <p><strong>3. Practical Empowerment:</strong> Understanding space weather isn't just intellectually satisfying—it's practically important. We provide actionable information that helps people and organizations prepare for, respond to, and recover from space weather events.</p>
+            </div>
+
+            <div class="alert-box">
+                🚀 Looking Ahead: This is just the beginning. We're committed to continuously improving this platform with enhanced real-time monitoring tools, personalized alert systems, interactive simulations, educational resources for all age groups, and community-driven features that make space weather knowledge truly universal.
+            </div>
+
+            <div class="story-box">
+                <h3>🤝 Join the Journey</h3>
+                <p>Space weather doesn't respect borders, industries, or backgrounds—it affects all of humanity. That's why understanding it should be a universal right, not a specialized privilege. Whether you're here out of curiosity, professional necessity, or genuine concern for our technological infrastructure, you're part of a growing community that recognizes the importance of space weather awareness.</p>
+                <p>The Sun will continue its cycles. Solar storms will keep coming. But together, armed with knowledge and accessible tools, we can face these cosmic challenges with confidence rather than fear. Because when everyone understands space weather, everyone can help protect our connected world.</p>
+                <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem; color: #ff8c00; font-weight: 600;">Knowledge shared is humanity empowered. Welcome to The Solar Winds.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">The Journey Continues</h2>
+            <div class="story-box">
+                <p style="text-align: center; font-size: 1.2rem;">Space weather is a constant reminder that we live in a dynamic, interconnected solar system. As our civilization becomes increasingly dependent on technology, understanding and predicting space weather becomes not just fascinating science—but a necessity for our future.</p>
+                <p style="text-align: center; font-size: 1.2rem; margin-top: 1rem;">The Sun will continue its cycles. Storms will come. But armed with knowledge, advanced monitoring systems, and a global community committed to understanding, humanity is learning to weather the solar storm together.</p>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <span style="font-size: 3rem;">☀️🌍🛡️</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>The Solar Winds - Your Complete Guide to Solar Storms and Space Weather</p>
+        <p style="margin-top: 1rem;">Built with data from <a href="https://www.nasa.gov" target="_blank">NASA</a> and <a href="https://www.noaa.gov" target="_blank">NOAA</a></p>
+        <p style="margin-top: 1rem; color: #888;">Stay curious. Stay informed. Look up.</p>
+    </footer>
+
     <script>
-        // Dados em memória (perdidos quando a página é fechada)
-        let messages = [];
-        let onlineUsers = new Set(); // Usando Set para evitar duplicatas
-        let username = '';
-        let lastMessageCount = 0;
-        let userActivityTimeout = new Map(); // Para controlar timeout dos usuários
+        const quizData = {
+            questions: document.querySelectorAll('.quiz-question'),
+            selectedAnswers: {},
+            totalQuestions: 5
+        };
 
-        // Configura o horário da mensagem de boas-vindas
-        document.getElementById('welcome-time').textContent = new Date().toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        // Função para mostrar mensagens de erro/sucesso
-        function showMessage(text, type = 'error') {
-            const messagesContainer = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = text;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
-                }
-            }, 5000);
-        }
-
-        // Função para enviar mensagem
-        function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            const usernameInput = document.getElementById('username');
-            
-            const message = messageInput.value.trim();
-            username = usernameInput.value.trim();
-            
-            if (!username) {
-                showMessage('Por favor, digite seu nome primeiro!');
-                usernameInput.focus();
-                return;
-            }
-            
-            if (!message) {
-                messageInput.focus();
-                return;
-            }
-            
-            // Adicionar mensagem ao array em memória
-            const newMessage = {
-                id: Date.now(),
-                username: username,
-                message: message,
-                timestamp: new Date().toISOString()
-            };
-            
-            messages.push(newMessage);
-            
-            // Limitar a 100 mensagens para não sobrecarregar a memória
-            if (messages.length > 100) {
-                messages = messages.slice(-100);
-            }
-            
-            // Adicionar usuário aos online
-            addUserOnline(username);
-            
-            // Limpar input e atualizar interface
-            messageInput.value = '';
-            displayMessages();
-            
-            showMessage('Mensagem enviada!', 'success');
-        }
-
-        // Função para adicionar usuário online
-        function addUserOnline(user) {
-            if (user && user.trim()) {
-                onlineUsers.add(user.trim());
+        // Handle option selection
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                const questionNum = question.dataset.question;
                 
-                // Limpar timeout anterior se existir
-                if (userActivityTimeout.has(user)) {
-                    clearTimeout(userActivityTimeout.get(user));
-                }
-                
-                // Definir novo timeout para remover usuário após 30 segundos de inatividade
-                const timeoutId = setTimeout(() => {
-                    onlineUsers.delete(user);
-                    updateOnlineUsers();
-                }, 30000);
-                
-                userActivityTimeout.set(user, timeoutId);
-                updateOnlineUsers();
-            }
-        }
-
-        // Função para exibir mensagens
-        function displayMessages() {
-            const messagesContainer = document.getElementById('messages');
-            const wasAtBottom = messagesContainer.scrollTop >= (messagesContainer.scrollHeight - messagesContainer.clientHeight - 50);
-            
-            // Limpar container mantendo apenas a mensagem de boas-vindas
-            const welcomeMessage = messagesContainer.firstElementChild;
-            messagesContainer.innerHTML = '';
-            messagesContainer.appendChild(welcomeMessage);
-            
-            // Adicionar todas as mensagens
-            messages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message';
-                
-                const date = new Date(msg.timestamp);
-                const timeString = date.toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
+                // Remove selected class from all options in this question
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected');
                 });
                 
-                messageDiv.innerHTML = `
-                    <div class="message-header">
-                        <span class="username">${escapeHtml(msg.username)}</span>
-                        <span class="timestamp">${timeString}</span>
-                    </div>
-                    <div class="message-content">
-                        ${escapeHtml(msg.message)}
-                    </div>
-                `;
+                // Add selected class to clicked option
+                this.classList.add('selected');
                 
-                messagesContainer.appendChild(messageDiv);
+                // Store the answer
+                quizData.selectedAnswers[questionNum] = this.dataset.answer;
             });
-            
-            // Rolar para baixo se estava no final
-            if (wasAtBottom || messages.length !== lastMessageCount) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-            
-            lastMessageCount = messages.length;
-        }
+        });
 
-        // Função para atualizar lista de usuários online
-        function updateOnlineUsers() {
-            const userList = document.getElementById('user-list');
-            const userCount = document.getElementById('user-count');
+        // Submit quiz
+        document.getElementById('submitQuiz').addEventListener('click', function() {
+            const answered = Object.keys(quizData.selectedAnswers).length;
             
-            userList.innerHTML = '';
-            userCount.textContent = onlineUsers.size;
-            
-            if (onlineUsers.size === 0) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.className = 'user-item';
-                emptyDiv.textContent = 'Nenhum usuário online';
-                emptyDiv.style.opacity = '0.6';
-                userList.appendChild(emptyDiv);
-            } else {
-                // Converter Set para Array e ordenar
-                const sortedUsers = Array.from(onlineUsers).sort();
+            if (answered < quizData.totalQuestions) {
+                alert(`Please answer all questions! You've answered ${answered} out of ${quizData.totalQuestions}.`);
+                return;
+            }
+
+            let correctCount = 0;
+
+            // Check all answers
+            quizData.questions.forEach((question, index) => {
+                const selectedOption = question.querySelector('.quiz-option.selected');
+                const allOptions = question.querySelectorAll('.quiz-option');
+                const explanation = question.querySelector('.quiz-explanation');
                 
-                sortedUsers.forEach(user => {
-                    const userDiv = document.createElement('div');
-                    userDiv.className = 'user-item';
-                    userDiv.innerHTML = `<span class="status-indicator" style="width: 6px; height: 6px; margin-right: 8px;"></span>${escapeHtml(user)}`;
-                    userList.appendChild(userDiv);
+                allOptions.forEach(opt => {
+                    if (opt.dataset.answer === 'correct') {
+                        opt.classList.add('correct');
+                    }
                 });
-            }
-        }
 
-        // Função para atualizar atividade do usuário
-        function updateUserActivity() {
-            const usernameInput = document.getElementById('username');
-            const currentUsername = usernameInput.value.trim();
-            
-            if (currentUsername && currentUsername !== username) {
-                username = currentUsername;
-                addUserOnline(username);
-            } else if (username) {
-                addUserOnline(username);
-            }
-        }
+                if (selectedOption && selectedOption.dataset.answer === 'correct') {
+                    correctCount++;
+                } else if (selectedOption) {
+                    selectedOption.classList.add('incorrect');
+                }
 
-        // Função para escapar HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+                // Show explanation
+                explanation.style.display = 'block';
+            });
 
-        // Event listeners
-        document.getElementById('message-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+            // Show result
+            const percentage = (correctCount / quizData.totalQuestions) * 100;
+            let message = '';
+            let emoji = '';
+
+            if (percentage === 100) {
+                message = 'Perfect Score! You\'re a Space Weather Expert! ';
+                emoji = '🌟🎉';
+            } else if (percentage >= 80) {
+                message = 'Excellent! You know your space weather! ';
+                emoji = '⚡🛰️';
+            } else if (percentage >= 60) {
+                message = 'Good job! You\'re learning fast! ';
+                emoji = '☀️📡';
+            } else {
+                message = 'Keep learning! Space weather is fascinating! ';
+                emoji = '🌍🔬';
             }
+
+            document.getElementById('quizResult').innerHTML = `
+                <div class="quiz-result">
+                    ${emoji}<br>
+                    ${message}<br>
+                    You got ${correctCount} out of ${quizData.totalQuestions} correct! (${percentage}%)
+                </div>
+            `;
+
+            // Disable submit button and show reset
+            this.style.display = 'none';
+            document.getElementById('resetQuiz').style.display = 'inline-block';
+
+            // Disable all options
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.style.cursor = 'default';
+                opt.onclick = null;
+            });
         });
 
-        // Atualizar atividade quando o usuário digita o nome
-        document.getElementById('username').addEventListener('input', function(e) {
-            // Debounce para evitar muitas chamadas
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => {
-                updateUserActivity();
-            }, 1000);
+        // Reset quiz
+        document.getElementById('resetQuiz').addEventListener('click', function() {
+            // Clear all selections and classes
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.style.cursor = 'pointer';
+            });
+
+            // Hide explanations
+            document.querySelectorAll('.quiz-explanation').forEach(exp => {
+                exp.style.display = 'none';
+            });
+
+            // Clear result
+            document.getElementById('quizResult').innerHTML = '';
+
+            // Reset data
+            quizData.selectedAnswers = {};
+
+            // Show submit button, hide reset
+            document.getElementById('submitQuiz').style.display = 'inline-block';
+            this.style.display = 'none';
+
+            // Re-enable option selection
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const question = this.closest('.quiz-question');
+                    const questionNum = question.dataset.question;
+                    
+                    question.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    this.classList.add('selected');
+                    quizData.selectedAnswers[questionNum] = this.dataset.answer;
+                });
+            });
         });
 
-        // Atualizar atividade periodicamente
-        setInterval(updateUserActivity, 15000);
-
-        // Limpeza quando a página é fechada
-        window.addEventListener('beforeunload', function() {
-            if (username) {
-                onlineUsers.delete(username);
-            }
+        // Smooth scrolling for navigation
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         });
-
-        // Inicialização
-        updateOnlineUsers();
     </script>
 </body>
 </html>
